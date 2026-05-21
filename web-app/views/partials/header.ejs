@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title><%= typeof title !== 'undefined' ? title + ' - ' : '' %>Gia Sư Bách Khoa</title>
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary-fixed": "#68fadd",
+            "on-secondary-container": "#007261",
+            "on-tertiary-fixed-variant": "#384953",
+            "surface-tint": "#0056d2",
+            "error-container": "#ffdad6",
+            "outline-variant": "#c3c6d6",
+            "tertiary": "#394953",
+            "secondary-container": "#68fadd",
+            "primary-fixed-dim": "#b2c5ff",
+            "primary-fixed": "#dae2ff",
+            "on-surface-variant": "#424654",
+            "on-surface": "#0b1c30",
+            "secondary-fixed-dim": "#44ddc1",
+            "on-background": "#0b1c30",
+            "on-secondary-fixed": "#00201a",
+            "on-tertiary": "#ffffff",
+            "inverse-on-surface": "#eaf1ff",
+            "surface-bright": "#f8f9ff",
+            "surface": "#f8f9ff",
+            "surface-dim": "#cbdbf5",
+            "primary-container": "#0056d2",
+            "tertiary-fixed": "#d3e5f1",
+            "error": "#ba1a1a",
+            "surface-container": "#e5eeff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-highest": "#d3e4fe",
+            "on-primary-fixed": "#001847",
+            "on-primary": "#ffffff",
+            "tertiary-container": "#50616b",
+            "surface-container-high": "#dce9ff",
+            "surface-container-low": "#eff4ff",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed": "#0c1e26",
+            "surface-variant": "#d3e4fe",
+            "inverse-primary": "#b2c5ff",
+            "outline": "#737785",
+            "background": "#f8f9ff",
+            "on-tertiary-container": "#cadce7",
+            "secondary": "#006b5c",
+            "on-primary-container": "#ccd8ff",
+            "primary": "#0040a1",
+            "on-secondary-fixed-variant": "#005145",
+            "tertiary-fixed-dim": "#b7c9d5",
+            "on-secondary": "#ffffff",
+            "inverse-surface": "#213145",
+            "on-primary-fixed-variant": "#0040a1"
+          },
+          fontFamily: {
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "label-md": ["Inter"],
+            "display-lg": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-md": ["Inter"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-panel {
+      background-color: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    }
+    .glass-nav {
+      background-color: rgba(248, 249, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    .text-gradient {
+      background: linear-gradient(to right, #0040a1, #006b5c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0040a1, #0056d2);
+      color: white;
+      border-radius: 0.5rem;
+      padding: 10px 24px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #003090, #0045c0);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #006b5c;
+      color: white;
+      border-radius: 0.5rem;
+      padding: 10px 24px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: #005a4d;
+    }
+    .btn-outline {
+      border: 1.5px solid #0040a1;
+      color: #0040a1;
+      border-radius: 0.5rem;
+      padding: 10px 24px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      background: #0040a1;
+      color: white;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-open { background: #e5f7ed; color: #006b5c; }
+    .badge-closed { background: #fff3cd; color: #856404; }
+    .badge-active { background: #dae2ff; color: #0040a1; }
+    .badge-pending { background: #fff3e0; color: #e65100; }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .status-dot-green { background: #006b5c; }
+    .status-dot-yellow { background: #e65100; }
+    .status-dot-blue { background: #0040a1; }
+  </style>
+</head>
+<body class="bg-background text-on-background antialiased selection:bg-primary-fixed selection:text-on-primary-fixed pt-[80px]">

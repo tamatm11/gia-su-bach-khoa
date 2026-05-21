@@ -1,0 +1,162 @@
+<%- include('partials/header', { title: gs.ho_ten }) %>
+<%- include('partials/navbar') %>
+
+<section class="max-w-[1280px] mx-auto px-4 md:px-10 pt-8 pb-16">
+  <% if (error) { %>
+    <div class="bg-error-container text-error px-4 py-3 rounded-lg text-body-md mb-4"><%= error %></div>
+  <% } %>
+
+  <!-- Profile Header -->
+  <div class="glass-panel rounded-2xl p-6 md:p-8 mb-6">
+    <div class="flex flex-col md:flex-row items-start gap-6">
+      <!-- Avatar -->
+      <div class="w-20 h-20 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-3xl font-bold shrink-0">
+        <%= gs.ho_ten.charAt(0) %>
+      </div>
+      <div class="flex-1">
+        <div class="flex flex-wrap items-center gap-3 mb-2">
+          <h1 class="text-headline-md text-on-surface"><%= gs.ho_ten %></h1>
+          <span class="badge <%= gs.trong_lich ? 'badge-open' : 'badge-closed' %>">
+            <span class="status-dot <%= gs.trong_lich ? 'status-dot-green' : 'status-dot-yellow' %>"></span>
+            <%= gs.trong_lich ? 'Đang trống lịch' : 'Đang bận' %>
+          </span>
+        </div>
+        <p class="text-body-lg text-primary font-medium mb-3"><%= gs.trinh_do || 'Chưa cập nhật trình độ' %></p>
+        <% if (gs.gioi_thieu) { %>
+          <p class="text-body-md text-on-surface-variant leading-relaxed"><%= gs.gioi_thieu %></p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-outline-variant">
+      <div class="text-center">
+        <div class="text-2xl font-bold text-primary"><%= gs.so_lop_da_nhan || 0 %></div>
+        <div class="text-label-sm text-on-surface-variant">Lớp đã nhận</div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl font-bold text-secondary"><%= gs.so_lop_dang_day || 0 %></div>
+        <div class="text-label-sm text-on-surface-variant">Đang dạy</div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl font-bold text-primary">
+          <%= gs.diem_danh_gia_tb ? Number(gs.diem_danh_gia_tb).toFixed(1) : 'N/A' %>
+          <span class="text-yellow-500 text-lg">&#9733;</span>
+        </div>
+        <div class="text-label-sm text-on-surface-variant">Điểm đánh giá</div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl font-bold text-secondary"><%= danhGia.length %></div>
+        <div class="text-label-sm text-on-surface-variant">Lượt đánh giá</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <!-- Left Column: Môn dạy + Đánh giá -->
+    <div class="space-y-6">
+      <!-- Môn dạy -->
+      <div class="glass-panel rounded-2xl p-6">
+        <h2 class="text-body-lg font-semibold mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">menu_book</span> Môn dạy
+        </h2>
+        <% if (monHoc.length > 0) { %>
+          <div class="flex flex-wrap gap-2">
+            <% monHoc.forEach(function(mh) { %>
+              <span class="badge badge-active text-sm px-4 py-2">
+                <%= mh.mon_hoc ? mh.mon_hoc.ten_mon : mh.ma_mon %>
+              </span>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="text-body-md text-on-surface-variant">Chưa cập nhật môn dạy.</p>
+        <% } %>
+      </div>
+
+      <!-- Đánh giá -->
+      <div class="glass-panel rounded-2xl p-6">
+        <h2 class="text-body-lg font-semibold mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">star</span> Đánh giá từ học viên
+        </h2>
+        <% if (danhGia.length > 0) { %>
+          <div class="space-y-4">
+            <% danhGia.forEach(function(dg) { %>
+              <div class="pb-4 border-b border-outline-variant last:border-0 last:pb-0">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-label-md font-semibold">
+                    <%= dg.dang_ky && dg.dang_ky.lop_hoc && dg.dang_ky.lop_hoc.hoc_vien ? dg.dang_ky.lop_hoc.hoc_vien.ho_ten : 'Ẩn danh' %>
+                  </span>
+                  <span class="text-yellow-500 text-label-sm">
+                    <% for (var i = 0; i < dg.diem_sao; i++) { %>&#9733;<% } %>
+                    <% for (var i = dg.diem_sao; i < 5; i++) { %>&#9734;<% } %>
+                  </span>
+                </div>
+                <% if (dg.nhan_xet) { %>
+                  <p class="text-body-md text-on-surface-variant"><%= dg.nhan_xet %></p>
+                <% } %>
+                <p class="text-label-sm text-on-surface-variant mt-1"><%= new Date(dg.ngay_danh_gia).toLocaleDateString('vi-VN') %></p>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="text-body-md text-on-surface-variant">Chưa có đánh giá nào.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Right Column: Lớp đang dạy + Đã hoàn thành -->
+    <div class="space-y-6">
+      <!-- Lớp đang dạy -->
+      <div class="glass-panel rounded-2xl p-6">
+        <h2 class="text-body-lg font-semibold mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">play_circle</span> Lớp đang dạy
+        </h2>
+        <% if (lopDangDay.length > 0) { %>
+          <div class="space-y-3">
+            <% lopDangDay.forEach(function(lop) { %>
+              <div class="p-3 rounded-xl bg-surface-container-low">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-mono text-label-sm"><%= lop.ma_lop %></span>
+                  <span class="badge badge-active">Đang học</span>
+                </div>
+                <p class="text-label-md">Học viên: <strong><%= lop.hoc_vien ? lop.hoc_vien.ho_ten : 'N/A' %></strong></p>
+                <p class="text-label-sm text-on-surface-variant mt-1">
+                  Bắt đầu: <%= lop.ngay_bat_dau ? new Date(lop.ngay_bat_dau).toLocaleDateString('vi-VN') : 'N/A' %> · <%= lop.tong_so_buoi || 0 %> buổi
+                </p>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="text-body-md text-on-surface-variant">Không có lớp đang dạy.</p>
+        <% } %>
+      </div>
+
+      <!-- Lớp đã hoàn thành -->
+      <div class="glass-panel rounded-2xl p-6">
+        <h2 class="text-body-lg font-semibold mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">check_circle</span> Lớp đã hoàn thành
+        </h2>
+        <% if (lopDaDay.length > 0) { %>
+          <div class="space-y-3">
+            <% lopDaDay.forEach(function(lop) { %>
+              <div class="p-3 rounded-xl bg-surface-container-low">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-mono text-label-sm"><%= lop.ma_lop %></span>
+                  <span class="badge badge-open">Hoàn thành</span>
+                </div>
+                <p class="text-label-md">Học viên: <strong><%= lop.hoc_vien ? lop.hoc_vien.ho_ten : 'N/A' %></strong></p>
+                <p class="text-label-sm text-on-surface-variant mt-1">
+                  Bắt đầu: <%= lop.ngay_bat_dau ? new Date(lop.ngay_bat_dau).toLocaleDateString('vi-VN') : 'N/A' %> · <%= lop.tong_so_buoi || 0 %> buổi
+                </p>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="text-body-md text-on-surface-variant">Chưa có lớp hoàn thành.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

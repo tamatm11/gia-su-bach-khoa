@@ -1,0 +1,50 @@
+<nav class="glass-nav fixed top-0 left-0 right-0 z-50 h-[72px] flex items-center">
+  <div class="max-w-[1280px] mx-auto w-full px-4 md:px-10 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-3 no-underline">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="210" height="45">
+        <rect width="280" height="60" fill="none"/>
+        <path d="M22 18 L32 12 L42 18 L42 36 L32 42 L22 36 Z" fill="#1E40AF"/>
+        <path d="M25 21 L32 16 L39 21 L39 33 L32 38 L25 33 Z" fill="#FFFFFF"/>
+        <text x="55" y="38" font-family="Inter,sans-serif" font-weight="bold" font-size="18" fill="#1E40AF">Gia Sư Bách Khoa</text>
+      </svg>
+    </a>
+
+    <!-- Nav Links -->
+    <div class="hidden md:flex items-center gap-1">
+      <a href="/" class="px-4 py-2 text-on-surface-variant hover:text-primary rounded-lg text-label-md transition-colors">Trang chủ</a>
+      <a href="/yeu-cau" class="px-4 py-2 text-on-surface-variant hover:text-primary rounded-lg text-label-md transition-colors">Yêu cầu lớp</a>
+      <% if (role === 'gia_su') { %>
+        <a href="/lop-hoc" class="px-4 py-2 text-on-surface-variant hover:text-primary rounded-lg text-label-md transition-colors">Lớp của tôi</a>
+        <a href="/lich-day" class="px-4 py-2 text-on-surface-variant hover:text-primary rounded-lg text-label-md transition-colors">Lịch dạy</a>
+      <% } else if (role === 'hoc_vien') { %>
+        <a href="/dang-tin" class="px-4 py-2 text-on-surface-variant hover:text-primary rounded-lg text-label-md transition-colors">Đăng tin</a>
+        <a href="/yeu-cau-cua-toi" class="px-4 py-2 text-on-surface-variant hover:text-primary rounded-lg text-label-md transition-colors">Yêu cầu của tôi</a>
+        <a href="/lop-hoc" class="px-4 py-2 text-on-surface-variant hover:text-primary rounded-lg text-label-md transition-colors">Lớp học</a>
+      <% } %>
+      <% if (isAdmin) { %>
+        <a href="/admin" class="px-4 py-2 text-on-surface-variant hover:text-error rounded-lg text-label-md transition-colors font-semibold">Quản trị</a>
+      <% } %>
+    </div>
+
+    <!-- User Menu -->
+    <div class="flex items-center gap-3">
+      <% if (user) { %>
+        <span class="text-label-md text-on-surface-variant hidden md:inline">
+          <span class="material-symbols-outlined align-middle text-[18px]">person</span>
+          <%= user.ho_ten %>
+        </span>
+        <% if (role === 'gia_su') { %>
+          <a href="/lich-day" class="badge <%= user.trong_lich ? 'badge-open' : 'badge-closed' %> text-decoration-none">
+            <span class="status-dot <%= user.trong_lich ? 'status-dot-green' : 'status-dot-yellow' %>"></span>
+            <%= user.trong_lich ? 'Đang trống lịch' : 'Đang bận' %>
+          </a>
+        <% } %>
+        <a href="/auth/logout" class="btn-outline text-decoration-none" style="padding:6px 16px;font-size:13px;">Đăng xuất</a>
+      <% } else { %>
+        <button onclick="openAuthModal('login')" class="btn-outline text-decoration-none" style="padding:7px 18px;font-size:14px;">Đăng nhập</button>
+        <button onclick="openAuthModal('register')" class="btn-primary text-decoration-none" style="padding:8px 20px;font-size:14px;">Đăng ký</button>
+      <% } %>
+    </div>
+  </div>
+</nav>

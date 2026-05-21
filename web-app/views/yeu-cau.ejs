@@ -1,0 +1,222 @@
+<%- include('partials/header', { title: 'Yêu cầu lớp đang mở' }) %>
+<%- include('partials/navbar') %>
+
+<section class="max-w-[1280px] mx-auto px-4 md:px-10 pt-8 pb-16">
+  <% if (error) { %>
+    <div class="bg-error-container text-error px-4 py-3 rounded-lg text-body-md mb-4"><%= error %></div>
+  <% } %>
+  <% if (success) { %>
+    <div class="bg-secondary-container text-on-secondary-container px-4 py-3 rounded-lg text-body-md mb-4"><%= success %></div>
+  <% } %>
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-headline-lg text-on-surface">Yêu cầu lớp đang mở</h1>
+      <p class="text-body-md text-on-surface-variant mt-1">Danh sách yêu cầu tìm gia sư đang mở - ứng tuyển ngay</p>
+    </div>
+  </div>
+
+  <% if (list && list.length > 0) { %>
+    <div class="grid md:grid-cols-2 gap-4">
+      <% list.forEach(function(yc) { %>
+        <div class="card">
+          <div class="flex items-start justify-between mb-3">
+            <span class="badge badge-open">Đang mở</span>
+            <span class="text-label-sm text-on-surface-variant"><%= new Date(yc.ngay_yeu_cau).toLocaleDateString('vi-VN') %></span>
+          </div>
+          <h3 class="text-body-lg font-semibold mb-1"><%= yc.tieu_de %></h3>
+          <p class="text-body-md text-on-surface-variant mb-2"><%= yc.mo_ta || 'Không có mô tả chi tiết' %></p>
+          <div class="grid grid-cols-2 gap-2 text-label-md text-on-surface-variant mb-4">
+            <div><span class="material-symbols-outlined text-[16px] align-middle">payments</span> <%= Math.round(Number(yc.tien_hoc_phi) / 1000) %>k/buổi</div>
+            <div><span class="material-symbols-outlined text-[16px] align-middle">location_on</span> <%= yc.hinh_thuc_hoc %></div>
+            <div><span class="material-symbols-outlined text-[16px] align-middle">event</span> <%= yc.so_buoi_tuan %> buổi/tuần</div>
+            <div><span class="material-symbols-outlined text-[16px] align-middle">school</span> <%= yc.hoc_vien ? yc.hoc_vien.khoi_hien_tai : 'N/A' %></div>
+          </div>
+          <p class="text-label-sm text-on-surface-variant mb-1">Học viên: <strong><%= yc.hoc_vien ? yc.hoc_vien.ho_ten : 'N/A' %></strong></p>
+
+          <% if (role === 'gia_su') { %>
+            <button onclick="openUngTuyenModal('<%= yc.ma_yeu_cau %>', '<%= yc.tieu_de.replace(/'/g, "\\'") %>')" class="btn-primary w-full mt-3 text-center block">
+              Ứng tuyển ngay
+            </button>
+          <% } else if (!user) { %>
+            <p class="text-label-sm text-primary mt-3 cursor-pointer" onclick="openAuthModal('login')">Đăng nhập để ứng tuyển →</p>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <div class="glass-panel rounded-2xl p-12 text-center">
+      <p class="text-body-lg text-on-surface-variant">Chưa có yêu cầu nào đang mở.</p>
+      <% if (role === 'hoc_vien') { %>
+        <a href="/dang-tin" class="btn-primary no-underline mt-4 inline-block">Đăng yêu cầu đầu tiên</a>
+      <% } %>
+    </div>
+  <% } %>
+</section>
+
+<!-- Modal ứng tuyển -->
+<div id="ungTuyenModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+  <div class="glass-panel rounded-2xl p-6 w-full max-w-lg mx-4">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-headline-md">Ứng tuyển</h3>
+      <button onclick="closeUngTuyenModal()" class="text-on-surface-variant hover:text-on-surface">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form action="/ung-tuyen" method="POST">
+      <input type="hidden" name="ma_yeu_cau" id="utMaYeuCau"/>
+      <div class="space-y-4">
+        <div>
+          <p class="text-label-md text-on-surface-variant mb-1">Yêu cầu: <strong id="utYeuCauTitle"></strong></p>
+        </div>
+        <div>
+          <label class="text-label-md text-on-surface-variant block mb-1">Thu nhập mong muốn (VNĐ)</label>
+          <input type="number" name="thu_nhap_mong_muon" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface" placeholder="Ví dụ: 200000"/>
+        </div>
+        <div>
+          <label class="text-label-md text-on-surface-variant block mb-1">Lời nhắn đến học viên</label>
+          <textarea name="loi_nhan" rows="4" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface" placeholder="Giới thiệu ngắn về bản thân, kinh nghiệm, phương pháp dạy..."></textarea>
+        </div>
+        <button type="submit" class="btn-primary w-full">Gửi ứng tuyển</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+<div id="authModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm" onclick="if(event.target===this)closeAuthModal()">
+  <div class="glass-panel rounded-2xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-headline-md" id="authModalTitle">Đăng nhập</h2>
+      <button onclick="closeAuthModal()" class="text-on-surface-variant hover:text-on-surface">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-0 mb-6 bg-surface-container-low rounded-xl p-1">
+      <button id="tabLogin" onclick="switchAuthTab('login')" class="flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors bg-primary-container text-on-primary-container">Đăng nhập</button>
+      <button id="tabRegister" onclick="switchAuthTab('register')" class="flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors text-on-surface-variant">Đăng ký</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginPanel">
+      <form action="/auth/login" method="POST" class="space-y-4">
+        <div>
+          <label class="text-label-md text-on-surface-variant block mb-1">Email</label>
+          <input type="email" name="email" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+        </div>
+        <div>
+          <label class="text-label-md text-on-surface-variant block mb-1">Mật khẩu</label>
+          <input type="password" name="password" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+        </div>
+        <button type="submit" class="btn-primary w-full py-2.5">Đăng nhập</button>
+      </form>
+    </div>
+
+    <!-- Register Panel -->
+    <div id="registerPanel" class="hidden">
+      <!-- Role Cards -->
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <button type="button" id="roleCardHocVien" onclick="selectRegisterRole('hoc_vien')" class="p-4 rounded-xl border-2 border-outline-variant bg-surface-container-lowest text-on-surface hover:border-primary transition-all text-left">
+          <span class="material-symbols-outlined text-3xl text-primary mb-2 block">school</span>
+          <h3 class="text-body-lg font-semibold mb-1">Học viên</h3>
+          <p class="text-label-sm text-on-surface-variant">Tìm gia sư phù hợp</p>
+        </button>
+        <button type="button" id="roleCardGiaSu" onclick="selectRegisterRole('gia_su')" class="p-4 rounded-xl border-2 border-outline-variant bg-surface-container-lowest text-on-surface hover:border-secondary transition-all text-left">
+          <span class="material-symbols-outlined text-3xl text-secondary mb-2 block">person_book</span>
+          <h3 class="text-body-lg font-semibold mb-1">Gia sư</h3>
+          <p class="text-label-sm text-on-surface-variant">Nhận lớp dạy phù hợp</p>
+        </button>
+      </div>
+
+      <form action="/auth/register" method="POST" class="space-y-4" id="registerForm">
+        <input type="hidden" name="role" id="registerRoleInput" value=""/>
+        <div>
+          <label class="text-label-md text-on-surface-variant block mb-1">Họ tên</label>
+          <input type="text" name="ho_ten" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+        </div>
+        <div>
+          <label class="text-label-md text-on-surface-variant block mb-1">Email</label>
+          <input type="email" name="email" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+        </div>
+        <div>
+          <label class="text-label-md text-on-surface-variant block mb-1">Mật khẩu</label>
+          <input type="password" name="password" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+        </div>
+        <div>
+          <label class="text-label-md text-on-surface-variant block mb-1">Số điện thoại</label>
+          <input type="text" name="so_dien_thoai" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+        </div>
+        <button type="submit" id="registerSubmitBtn" class="btn-secondary w-full py-2.5 opacity-50 cursor-not-allowed" disabled>Chọn vai trò để đăng ký</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedRole = '';
+
+  function openAuthModal(tab) {
+    document.getElementById('authModal').classList.remove('hidden');
+    switchAuthTab(tab || 'login');
+  }
+
+  function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+
+  function switchAuthTab(tab) {
+    const tabLogin = document.getElementById('tabLogin');
+    const tabRegister = document.getElementById('tabRegister');
+    const loginPanel = document.getElementById('loginPanel');
+    const registerPanel = document.getElementById('registerPanel');
+
+    if (tab === 'login') {
+      tabLogin.className = 'flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors bg-primary-container text-on-primary-container';
+      tabRegister.className = 'flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors text-on-surface-variant';
+      loginPanel.classList.remove('hidden');
+      registerPanel.classList.add('hidden');
+      document.getElementById('authModalTitle').textContent = 'Đăng nhập';
+    } else {
+      tabRegister.className = 'flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors bg-primary-container text-on-primary-container';
+      tabLogin.className = 'flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors text-on-surface-variant';
+      registerPanel.classList.remove('hidden');
+      loginPanel.classList.add('hidden');
+      document.getElementById('authModalTitle').textContent = 'Đăng ký';
+    }
+  }
+
+  function selectRegisterRole(role) {
+    selectedRole = role;
+    document.getElementById('registerRoleInput').value = role;
+
+    const cardHV = document.getElementById('roleCardHocVien');
+    const cardGS = document.getElementById('roleCardGiaSu');
+    const submitBtn = document.getElementById('registerSubmitBtn');
+
+    // Reset borders
+    cardHV.style.borderColor = '#c3c6d6'; cardHV.style.borderWidth = '2px';
+    cardGS.style.borderColor = '#c3c6d6'; cardGS.style.borderWidth = '2px';
+
+    if (role === 'hoc_vien') {
+      cardHV.style.borderColor = '#0040a1'; cardHV.style.borderWidth = '2px';
+      submitBtn.className = 'btn-primary w-full py-2.5';
+      submitBtn.textContent = 'Đăng ký làm Học viên';
+    } else {
+      cardGS.style.borderColor = '#006b5c'; cardGS.style.borderWidth = '2px';
+      submitBtn.className = 'btn-secondary w-full py-2.5';
+      submitBtn.textContent = 'Đăng ký làm Gia sư';
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+  }
+
+  function openUngTuyenModal(maYeuCau, title) {
+    document.getElementById('utMaYeuCau').value = maYeuCau;
+    document.getElementById('utYeuCauTitle').textContent = title;
+    document.getElementById('ungTuyenModal').classList.remove('hidden');
+  }
+  function closeUngTuyenModal() { document.getElementById('ungTuyenModal').classList.add('hidden'); }
+</script>
+
+<%- include('partials/footer') %>

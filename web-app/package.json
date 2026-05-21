@@ -1,0 +1,19 @@
+{
+  "name": "gia-su-bach-khoa",
+  "version": "1.0.0",
+  "description": "Gia Sư Bách Khoa - Nền tảng kết nối gia sư và học viên",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ejs": "^3.1.10",
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5",
+    "express-session": "^1.18.0",
+    "connect-pg-simple": "^9.0.0",
+    "bcryptjs": "^2.4.3"
+  }
+}

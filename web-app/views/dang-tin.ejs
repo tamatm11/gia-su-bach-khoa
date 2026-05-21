@@ -1,0 +1,70 @@
+<%- include('partials/header', { title: 'Đăng yêu cầu tìm gia sư' }) %>
+<%- include('partials/navbar') %>
+
+<section class="max-w-[720px] mx-auto px-4 md:px-10 pt-8 pb-16">
+  <div class="glass-panel rounded-2xl p-6 md:p-10">
+    <h1 class="text-headline-lg text-on-surface mb-2">Đăng yêu cầu tìm gia sư</h1>
+    <p class="text-body-md text-on-surface-variant mb-8">Mô tả chi tiết nhu cầu học để gia sư phù hợp ứng tuyển.</p>
+
+    <% if (error) { %>
+      <div class="bg-error-container text-error px-4 py-3 rounded-lg text-body-md mb-4"><%= error %></div>
+    <% } %>
+
+    <form action="/dang-tin" method="POST" class="space-y-5">
+      <div>
+        <label class="text-label-md text-on-surface block mb-1">Tiêu đề <span class="text-error">*</span></label>
+        <input type="text" name="tieu_de" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface" placeholder="Ví dụ: Cần gia sư Toán 12 luyện thi đại học"/>
+      </div>
+
+      <div>
+        <label class="text-label-md text-on-surface block mb-1">Mô tả chi tiết</label>
+        <textarea name="mo_ta" rows="4" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface" placeholder="Mô tả trình độ hiện tại, mục tiêu học tập, yêu cầu về gia sư..."></textarea>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="text-label-md text-on-surface block mb-1">Học phí/buổi <span class="text-error">*</span></label>
+          <input type="number" name="tien_hoc_phi" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface" placeholder="Ví dụ: 300000 (300k/buổi)"/>
+        </div>
+        <div>
+          <label class="text-label-md text-on-surface block mb-1">Số buổi/tuần <span class="text-error">*</span></label>
+          <input type="number" name="so_buoi_tuan" required min="1" max="7" value="2" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="text-label-md text-on-surface block mb-1">Hình thức học <span class="text-error">*</span></label>
+          <select name="hinh_thuc_hoc" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface">
+            <option value="Offline">Offline - Tại nhà</option>
+            <option value="Online">Online - Qua video</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-label-md text-on-surface block mb-1">Môn học chính</label>
+          <select name="ma_mon" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface">
+            <option value="MH001">Toán</option>
+            <option value="MH002">Vật Lý</option>
+            <option value="MH003">Hóa Học</option>
+            <option value="MH004">Tiếng Anh</option>
+            <option value="MH005">Ngữ Văn</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-label-md text-on-surface block mb-1">Địa chỉ <span class="text-error">*</span></label>
+        <input type="text" name="dia_chi" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface" placeholder="Quận/Huyện, Tỉnh/Thành phố"/>
+      </div>
+
+      <div>
+        <label class="text-label-md text-on-surface block mb-1">Thời gian mong muốn</label>
+        <input type="text" name="thoi_gian_mong_muon" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface" placeholder="Ví dụ: Tối thứ 2-4-6 từ 18h-20h"/>
+      </div>
+
+      <button type="submit" class="btn-primary w-full text-lg py-3">Đăng yêu cầu</button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

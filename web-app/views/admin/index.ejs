@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Admin - Gia Sư Bách Khoa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary-fixed": "#68fadd", "on-secondary-container": "#007261",
+            "on-tertiary-fixed-variant": "#384953", "surface-tint": "#0056d2",
+            "error-container": "#ffdad6", "outline-variant": "#c3c6d6",
+            "tertiary": "#394953", "secondary-container": "#68fadd",
+            "primary-fixed-dim": "#b2c5ff", "primary-fixed": "#dae2ff",
+            "on-surface-variant": "#424654", "on-surface": "#0b1c30",
+            "secondary-fixed-dim": "#44ddc1", "on-background": "#0b1c30",
+            "on-secondary-fixed": "#00201a", "on-tertiary": "#ffffff",
+            "inverse-on-surface": "#eaf1ff", "surface-bright": "#f8f9ff",
+            "surface": "#f8f9ff", "surface-dim": "#cbdbf5",
+            "primary-container": "#0056d2", "tertiary-fixed": "#d3e5f1",
+            "error": "#ba1a1a", "surface-container": "#e5eeff",
+            "surface-container-lowest": "#ffffff", "surface-container-highest": "#d3e4fe",
+            "on-primary-fixed": "#001847", "on-primary": "#ffffff",
+            "tertiary-container": "#50616b", "surface-container-high": "#dce9ff",
+            "surface-container-low": "#eff4ff", "on-error": "#ffffff",
+            "on-tertiary-fixed": "#0c1e26", "surface-variant": "#d3e4fe",
+            "inverse-primary": "#b2c5ff", "outline": "#737785",
+            "background": "#f8f9ff", "on-tertiary-container": "#cadce7",
+            "secondary": "#006b5c", "on-primary-container": "#ccd8ff",
+            "primary": "#0040a1", "on-secondary-fixed-variant": "#005145",
+            "tertiary-fixed-dim": "#b7c9d5", "on-secondary": "#ffffff",
+            "inverse-surface": "#213145", "on-primary-fixed-variant": "#0040a1"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-panel {
+      background-color: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.08); }
+    .badge {
+      display: inline-flex; align-items: center; padding: 4px 12px;
+      border-radius: 999px; font-size: 12px; font-weight: 600;
+    }
+    .badge-open { background: #e5f7ed; color: #006b5c; }
+    .badge-closed { background: #fff3cd; color: #856404; }
+    .badge-active { background: #dae2ff; color: #0040a1; }
+    .badge-pending { background: #fff3e0; color: #e65100; }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      border-radius: 12px; color: #424654; font-size: 14px; font-weight: 500;
+      transition: all 0.15s; text-decoration: none;
+    }
+    .sidebar-link:hover { background: #eff4ff; color: #0040a1; }
+    .sidebar-link.active { background: #dae2ff; color: #0040a1; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600;
+         color: #424654; text-transform: uppercase; letter-spacing: 0.05em;
+         border-bottom: 1px solid #c3c6d6; }
+    td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #e5eeff; }
+    tr:hover td { background: #f8f9ff; }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-surface-container-lowest border-r border-outline-variant flex flex-col fixed top-0 left-0 h-full z-40">
+      <div class="p-6 border-b border-outline-variant">
+        <a href="/" class="flex items-center gap-2 no-underline">
+          <span class="material-symbols-outlined text-primary text-2xl">school</span>
+          <span class="text-body-lg font-bold text-on-surface">Gia Sư BK</span>
+        </a>
+        <p class="text-label-sm text-on-surface-variant mt-1">Admin Panel</p>
+      </div>
+      <nav class="flex-1 p-4 space-y-1">
+        <a href="/admin" class="sidebar-link active">
+          <span class="material-symbols-outlined text-[20px]">dashboard</span> Tổng quan
+        </a>
+        <a href="/admin/yeu-cau" class="sidebar-link">
+          <span class="material-symbols-outlined text-[20px]">description</span> Yêu cầu lớp
+        </a>
+        <a href="/admin/lop-hoc" class="sidebar-link">
+          <span class="material-symbols-outlined text-[20px]">collections_bookmark</span> Lớp học
+        </a>
+      </nav>
+      <div class="p-4 border-t border-outline-variant">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="material-symbols-outlined text-on-surface-variant">person</span>
+          <span class="text-label-md text-on-surface-variant"><%= user.ho_ten %></span>
+        </div>
+        <a href="/" class="sidebar-link text-label-sm">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span> Về trang chủ
+        </a>
+        <a href="/auth/logout" class="sidebar-link text-label-sm text-error mt-1">
+          <span class="material-symbols-outlined text-[18px]">logout</span> Đăng xuất
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 ml-64 p-8">
+      <% if (error) { %>
+        <div class="bg-error-container text-error px-4 py-3 rounded-lg text-body-md mb-6"><%= error %></div>
+      <% } %>
+      <% if (success) { %>
+        <div class="bg-secondary-container text-on-secondary-container px-4 py-3 rounded-lg text-body-md mb-6"><%= success %></div>
+      <% } %>
+
+      <h1 class="text-headline-md text-on-surface mb-2">Tổng quan</h1>
+      <p class="text-body-md text-on-surface-variant mb-8">Thống kê hệ thống Gia Sư Bách Khoa</p>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="card">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="material-symbols-outlined text-3xl text-primary">group</span>
+            <div>
+              <div class="text-2xl font-bold text-on-surface"><%= stats.tong_hoc_vien || 0 %></div>
+              <div class="text-label-sm text-on-surface-variant">Học viên</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="material-symbols-outlined text-3xl text-secondary">person_book</span>
+            <div>
+              <div class="text-2xl font-bold text-on-surface"><%= stats.tong_gia_su || 0 %></div>
+              <div class="text-label-sm text-on-surface-variant">Gia sư</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="material-symbols-outlined text-3xl text-primary">description</span>
+            <div>
+              <div class="text-2xl font-bold text-on-surface"><%= stats.yeu_cau_dang_mo || 0 %></div>
+              <div class="text-label-sm text-on-surface-variant">Yêu cầu đang mở</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="material-symbols-outlined text-3xl text-secondary">collections_bookmark</span>
+            <div>
+              <div class="text-2xl font-bold text-on-surface"><%= stats.lop_dang_hoc || 0 %></div>
+              <div class="text-label-sm text-on-surface-variant">Lớp đang học</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Stats -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="card text-center">
+          <div class="text-2xl font-bold text-primary"><%= stats.tong_yeu_cau || 0 %></div>
+          <div class="text-label-sm text-on-surface-variant">Tổng yêu cầu</div>
+        </div>
+        <div class="card text-center">
+          <div class="text-2xl font-bold text-secondary"><%= stats.tong_lop_hoc || 0 %></div>
+          <div class="text-label-sm text-on-surface-variant">Tổng lớp học</div>
+        </div>
+        <div class="card text-center">
+          <div class="text-2xl font-bold text-primary"><%= stats.lop_da_hoan_thanh || 0 %></div>
+          <div class="text-label-sm text-on-surface-variant">Lớp hoàn thành</div>
+        </div>
+        <div class="card text-center">
+          <div class="text-2xl font-bold text-secondary"><%= Number(stats.tong_doanh_thu || 0).toLocaleString('vi-VN') %>đ</div>
+          <div class="text-label-sm text-on-surface-variant">Tổng doanh thu</div>
+        </div>
+      </div>
+
+      <!-- Recent Requests -->
+      <div class="glass-panel rounded-2xl p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-body-lg font-semibold">Yêu cầu gần đây</h2>
+          <a href="/admin/yeu-cau" class="text-primary text-label-sm no-underline hover:underline">Xem tất cả →</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã YC</th>
+                <th>Tiêu đề</th>
+                <th>Học viên</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (recentYC.length > 0) { %>
+                <% recentYC.forEach(function(yc) { %>
+                  <tr>
+                    <td class="font-mono text-label-sm"><%= yc.ma_yeu_cau %></td>
+                    <td class="font-medium"><%= yc.tieu_de %></td>
+                    <td><%= yc.hoc_vien ? yc.hoc_vien.ho_ten : 'N/A' %></td>
+                    <td><span class="badge <%= yc.trang_thai === 'open' ? 'badge-open' : yc.trang_thai === 'approved' ? 'badge-active' : 'badge-closed' %>"><%= yc.trang_thai %></span></td>
+                    <td class="text-on-surface-variant"><%= new Date(yc.ngay_yeu_cau).toLocaleDateString('vi-VN') %></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="5" class="text-center text-on-surface-variant py-6">Chưa có yêu cầu nào.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Classes -->
+      <div class="glass-panel rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-body-lg font-semibold">Lớp học gần đây</h2>
+          <a href="/admin/lop-hoc" class="text-primary text-label-sm no-underline hover:underline">Xem tất cả →</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã lớp</th>
+                <th>Gia sư</th>
+                <th>Học viên</th>
+                <th>Trạng thái</th>
+                <th>Ngày bắt đầu</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (recentLH.length > 0) { %>
+                <% recentLH.forEach(function(lh) { %>
+                  <tr>
+                    <td class="font-mono text-label-sm"><%= lh.ma_lop %></td>
+                    <td><%= lh.gia_su ? lh.gia_su.ho_ten : 'N/A' %></td>
+                    <td><%= lh.hoc_vien ? lh.hoc_vien.ho_ten : 'N/A' %></td>
+                    <td><span class="badge <%= lh.trang_thai === 'dang_hoc' ? 'badge-active' : lh.trang_thai === 'da_hoan_thanh' ? 'badge-open' : 'badge-pending' %>"><%= lh.trang_thai %></span></td>
+                    <td class="text-on-surface-variant"><%= lh.ngay_bat_dau ? new Date(lh.ngay_bat_dau).toLocaleDateString('vi-VN') : 'N/A' %></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="5" class="text-center text-on-surface-variant py-6">Chưa có lớp học nào.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
