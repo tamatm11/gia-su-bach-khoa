@@ -320,6 +320,22 @@ app.post('/ung-tuyen', async (req, res) => {
 });
 
 // =========================================================================
+// ROUTES - LỚP ĐÃ ỨNG TUYỂN (GIA SƯ)
+// =========================================================================
+
+app.get('/lop-da-ung-tuyen', async (req, res) => {
+  if (!req.session.user || req.session.role !== 'gia_su') return res.redirect('/');
+
+  const { data: utList } = await supabase
+    .from('ung_tuyen')
+    .select('*, yeu_cau_lop(*, hoc_vien(ho_ten))')
+    .eq('ma_gia_su', req.session.user.ma_gia_su)
+    .order('ngay_ung_tuyen', { ascending: false });
+
+  res.render('lop-da-ung-tuyen', { utList: utList || [] });
+});
+
+// =========================================================================
 // ROUTES - LỚP HỌC
 // =========================================================================
 

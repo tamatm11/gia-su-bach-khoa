@@ -1,0 +1,63 @@
+<%- include('partials/header', { title: 'Lớp đã ứng tuyển' }) %>
+<%- include('partials/navbar') %>
+
+<section class="max-w-[1280px] mx-auto px-4 md:px-10 pt-8 pb-16">
+  <% if (error) { %>
+    <div class="bg-error-container text-error px-4 py-3 rounded-lg text-body-md mb-4"><%= error %></div>
+  <% } %>
+  <% if (success) { %>
+    <div class="bg-secondary-container text-on-secondary-container px-4 py-3 rounded-lg text-body-md mb-4"><%= success %></div>
+  <% } %>
+
+  <h1 class="text-headline-lg text-on-surface mb-2">Lớp đã ứng tuyển</h1>
+  <p class="text-body-md text-on-surface-variant mb-8">Danh sách các yêu cầu tìm gia sư mà bạn đã gửi hồ sơ</p>
+
+  <% if (utList && utList.length > 0) { %>
+    <% utList.forEach(function(ut) { %>
+      <% var yc = ut.yeu_cau_lop; %>
+      <div class="card mb-6">
+        <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-body-lg font-semibold"><%= yc.tieu_de %></h3>
+            <% if (yc.trang_thai === 'open') { %>
+              <span class="badge badge-open">Yêu cầu mở</span>
+            <% } else if (yc.trang_thai === 'closed' || yc.trang_thai === 'approved') { %>
+              <span class="badge badge-closed">Đã đóng</span>
+            <% } else { %>
+              <span class="badge badge-pending"><%= yc.trang_thai %></span>
+            <% } %>
+          </div>
+          <span class="text-label-sm text-on-surface-variant">Ngày ứng tuyển: <%= new Date(ut.ngay_ung_tuyen).toLocaleDateString('vi-VN') %></span>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-2 text-label-md text-on-surface-variant mb-3">
+          <div>Học phí gốc: <strong><%= Math.round(Number(yc.tien_hoc_phi) / 1000) %>k/buổi</strong></div>
+          <div>Hình thức: <strong><%= yc.hinh_thuc_hoc %></strong></div>
+          <div>Số buổi: <strong><%= yc.so_buoi_tuan %>/tuần</strong></div>
+          <div>Học viên: <strong><%= yc.hoc_vien ? yc.hoc_vien.ho_ten : 'N/A' %></strong></div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-outline-variant">
+          <h4 class="text-label-md font-semibold mb-2">Hồ sơ ứng tuyển của bạn</h4>
+          <div class="flex items-center gap-2 mb-2">
+            Trạng thái: 
+            <span class="badge <%= ut.trang_thai === 'accepted' ? 'badge-active' : (ut.trang_thai === 'rejected' ? 'badge-closed' : 'badge-pending') %>">
+              <%= ut.trang_thai %>
+            </span>
+          </div>
+          <p class="text-label-sm text-on-surface-variant">Lời nhắn: <%= ut.loi_nhan || 'Không có' %></p>
+          <% if (ut.thu_nhap_mong_muon) { %>
+            <p class="text-label-sm text-primary mt-1">Học phí mong muốn: <%= Math.round(Number(ut.thu_nhap_mong_muon) / 1000) %>k/buổi</p>
+          <% } %>
+        </div>
+      </div>
+    <% }); %>
+  <% } else { %>
+    <div class="glass-panel rounded-2xl p-12 text-center">
+      <p class="text-body-lg text-on-surface-variant mb-4">Bạn chưa ứng tuyển yêu cầu nào.</p>
+      <a href="/yeu-cau" class="btn-primary no-underline">Tìm lớp ngay</a>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>
