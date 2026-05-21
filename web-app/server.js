@@ -439,6 +439,7 @@ function requireAdmin(req, res, next) {
     return res.redirect('/');
   }
   next();
+}
 // =========================================================================
 // ROUTES - ADMIN PANEL
 // =========================================================================
@@ -585,11 +586,9 @@ app.get('/api/ung-tuyen-count/:ma_yeu_cau', async (req, res) => {
 // =========================================================================
 
 if (require.main === module) {
-app.listen(PORT, () => {
-  console.log(`
-  ╔══════════════════════════════════════════════╗
-  ║   GIA SƯ BÁCH KHOA - Platform Ready         ║
-  ║   http://localhost:${PORT}                       ║
-  ╚══════════════════════════════════════════════╝
-  `);
-});
+  app.listen(PORT, () => {
+    console.log(`Server ready on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
