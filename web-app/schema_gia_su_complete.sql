@@ -671,7 +671,8 @@ END;
 $$;
 
 -- 7.8: sp_chon_gia_su
-CREATE OR REPLACE PROCEDURE public.sp_chon_gia_su(IN p_ma_yeu_cau varchar, IN p_ma_gia_su varchar)
+CREATE OR REPLACE FUNCTION public.sp_chon_gia_su(IN p_ma_yeu_cau varchar, IN p_ma_gia_su varchar)
+RETURNS void
 LANGUAGE plpgsql
 SET search_path TO 'public'
 AS $$
@@ -685,7 +686,8 @@ END;
 $$;
 
 -- 7.9: sp_danh_gia
-CREATE OR REPLACE PROCEDURE public.sp_danh_gia(IN p_ma_danh_gia varchar, IN p_ma_dang_ky varchar, IN p_diem_sao smallint, IN p_nhan_xet text DEFAULT NULL::text)
+CREATE OR REPLACE FUNCTION public.sp_danh_gia(IN p_ma_danh_gia varchar, IN p_ma_dang_ky varchar, IN p_diem_sao smallint, IN p_nhan_xet text DEFAULT NULL::text)
+RETURNS void
 LANGUAGE plpgsql
 SET search_path TO 'public'
 AS $$
@@ -696,7 +698,8 @@ END;
 $$;
 
 -- 7.10: sp_diem_danh
-CREATE OR REPLACE PROCEDURE public.sp_diem_danh(IN p_ma_buoi_hoc varchar, IN p_ma_dang_ky varchar, IN p_trang_thai varchar, IN p_so_phut_hoc integer DEFAULT NULL::integer)
+CREATE OR REPLACE FUNCTION public.sp_diem_danh(IN p_ma_buoi_hoc varchar, IN p_ma_dang_ky varchar, IN p_trang_thai varchar, IN p_so_phut_hoc integer DEFAULT NULL::integer)
+RETURNS void
 LANGUAGE plpgsql
 SET search_path TO 'public'
 AS $$
@@ -707,12 +710,13 @@ END;
 $$;
 
 -- 7.11: sp_ghi_nhan_thanh_toan
-CREATE OR REPLACE PROCEDURE public.sp_ghi_nhan_thanh_toan(
+CREATE OR REPLACE FUNCTION public.sp_ghi_nhan_thanh_toan(
     IN p_ma_giao_dich varchar, IN p_ma_dang_ky varchar,
     IN p_ma_tk_hv varchar, IN p_ma_tk_gs varchar,
     IN p_tong_tien numeric, IN p_ty_le numeric,
     IN p_loai_giao_dich varchar DEFAULT 'ThanhToanThang'::varchar
 )
+RETURNS void
 LANGUAGE plpgsql
 SET search_path TO 'public'
 AS $$
@@ -729,7 +733,8 @@ END;
 $$;
 
 -- 7.12: sp_tao_lop_hoc
-CREATE OR REPLACE PROCEDURE public.sp_tao_lop_hoc(IN p_ma_lop varchar, IN p_ma_yeu_cau varchar, IN p_ngay_bat_dau date, IN p_tong_so_buoi integer)
+CREATE OR REPLACE FUNCTION public.sp_tao_lop_hoc(IN p_ma_lop varchar, IN p_ma_yeu_cau varchar, IN p_ngay_bat_dau date, IN p_tong_so_buoi integer)
+RETURNS void
 LANGUAGE plpgsql
 SET search_path TO 'public'
 AS $$
@@ -762,11 +767,12 @@ END;
 $$;
 
 -- 7.13: sp_tao_yeu_cau_lop
-CREATE OR REPLACE PROCEDURE public.sp_tao_yeu_cau_lop(
+CREATE OR REPLACE FUNCTION public.sp_tao_yeu_cau_lop(
     IN p_ma_yeu_cau varchar, IN p_ma_hoc_vien varchar, IN p_tieu_de varchar,
     IN p_mo_ta text, IN p_tien_hoc_phi numeric, IN p_dia_chi text,
     IN p_hinh_thuc_hoc varchar, IN p_so_buoi_tuan smallint, IN p_thoi_gian_mong_muon text
 )
+RETURNS void
 LANGUAGE plpgsql
 SET search_path TO 'public'
 AS $$
@@ -777,7 +783,8 @@ END;
 $$;
 
 -- 7.14: sp_toggle_trong_lich
-CREATE OR REPLACE PROCEDURE public.sp_toggle_trong_lich(IN p_ma_gia_su varchar, IN p_trong_lich boolean)
+CREATE OR REPLACE FUNCTION public.sp_toggle_trong_lich(IN p_ma_gia_su varchar, IN p_trong_lich boolean)
+RETURNS void
 LANGUAGE plpgsql
 SET search_path TO 'public'
 AS $$
@@ -787,10 +794,11 @@ END;
 $$;
 
 -- 7.15: sp_ung_tuyen
-CREATE OR REPLACE PROCEDURE public.sp_ung_tuyen(
+CREATE OR REPLACE FUNCTION public.sp_ung_tuyen(
     IN p_ma_ung_tuyen varchar, IN p_ma_yeu_cau varchar, IN p_ma_gia_su varchar,
     IN p_thu_nhap_mong_muon numeric DEFAULT NULL::numeric, IN p_loi_nhan text DEFAULT NULL::text
 )
+RETURNS void
 LANGUAGE plpgsql
 SET search_path TO 'public'
 AS $$

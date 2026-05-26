@@ -63,114 +63,8 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Auth - Đăng ký
-app.post('/auth/register', async (req, res) => {
-  const { email, password, ho_ten, role, so_dien_thoai } = req.body;
-
-  // Validate input
-  if (!email || !password || !ho_ten || !role) {
-    req.session.error = 'Vui lòng điền đầy đủ thông tin bắt buộc.';
-    return res.redirect('/');
-  }
-  if (password.length < 6) {
-    req.session.error = 'Mật khẩu phải có ít nhất 6 ký tự.';
-    return res.redirect('/');
-  }
-  if (!['hoc_vien', 'gia_su'].includes(role)) {
-    req.session.error = 'Vai trò không hợp lệ.';
-    return res.redirect('/');
-  }
-
-  let authUserId = null;
-  try {
-    // Bước 1: Tạo auth user qua Admin API
-    const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.createUser({
-      email, password, email_confirm: true
-    });
-
-    if (authErr) {
-      if (authErr.message.includes('already been registered')) {
-        req.session.error = 'Email này đã được đăng ký. Vui lòng dùng email khác hoặc đăng nhập.';
-        return res.redirect('/');
-      }
-      throw authErr;
-    }
-
-    authUserId = authData.user.id;
-
-    // Bước 2: Tạo profile tương ứng
-    let profileErr = null;
-    if (role === 'hoc_vien') {
-      const ma = 'HV' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
-      const { error } = await supabaseAdmin.from('hoc_vien').insert({
-        ma_hoc_vien: ma, ho_ten, email, so_dien_thoai: so_dien_thoai || null, auth_id: authUserId
-      });
-      profileErr = error;
-    } else {
-      const ma = 'GS' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
-      const { error } = await supabaseAdmin.from('gia_su').insert({
-        ma_gia_su: ma, ho_ten, auth_id: authUserId
-      });
-      profileErr = error;
-    }
-
-    // Bước 3: Nếu insert profile thất bại -> rollback xóa auth user
-    if (profileErr) {
-      await supabaseAdmin.auth.admin.deleteUser(authUserId);
-      throw new Error('Không thể tạo hồ sơ: ' + profileErr.message);
-    }
-
-    req.session.success = 'Đăng ký thành công! Vui lòng đăng nhập.';
-    res.redirect('/');
-  } catch (err) {
-    // Nếu có lỗi và auth user đã được tạo, cố gắng xóa để tránh rác
-    if (authUserId) {
-      try { await supabaseAdmin.auth.admin.deleteUser(authUserId); } catch (_) {}
-    }
-    req.session.error = 'Lỗi đăng ký: ' + err.message;
-    res.redirect('/');
-  }
-});
-
-// Auth - Đăng nhập
-app.post('/auth/login', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({ email, password });
-    if (authErr) throw authErr;
-
-    // Kiểm tra admin trước
-    const { data: qtv } = await supabase.from('quan_tri_vien').select('*').eq('auth_id', authData.user.id).single();
-
-    if (qtv) {
-      req.session.user = qtv;
-      req.session.role = 'quan_tri_vien';
-      req.session.isAdmin = true;
-    } else {
-      // Tìm user trong hoc_vien hoặc gia_su
-      const { data: hv } = await supabase.from('hoc_vien').select('*').eq('auth_id', authData.user.id).single();
-      const { data: gs } = await supabase.from('gia_su').select('*').eq('auth_id', authData.user.id).single();
-      req.session.user = hv || gs;
-      req.session.role = hv ? 'hoc_vien' : 'gia_su';
-      req.session.isAdmin = false;
-    }
-
-    req.session.auth_id = authData.user.id;
-    req.session.access_token = authData.session.access_token;
-
-    req.session.success = 'Đăng nhập thành công!';
-    res.redirect('/');
-  } catch (err) {
-    req.session.error = 'Sai email hoặc mật khẩu.';
-    res.redirect('/');
-  }
-});
-
-// Đăng xuất
-app.get('/auth/logout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/');
-});
+// Auth router
+app.use('/auth', require('./routes/auth'));
 
 // =========================================================================
 // ROUTES - YÊU CẦU LỚP
@@ -339,62 +233,8 @@ app.get('/lop-da-ung-tuyen', async (req, res) => {
 // ROUTES - LỚP HỌC
 // =========================================================================
 
-app.get('/lop-hoc', async (req, res) => {
-  if (!req.session.user) return res.redirect('/');
-
-  let query = supabase.from('lop_hoc').select('*, gia_su(ho_ten), hoc_vien(ho_ten)');
-  if (req.session.role === 'gia_su') {
-    query = query.eq('ma_gia_su', req.session.user.ma_gia_su);
-  } else {
-    query = query.eq('ma_hoc_vien', req.session.user.ma_hoc_vien);
-  }
-  const { data: list } = await query.order('ngay_bat_dau', { ascending: false });
-
-  res.render('lop-hoc', { list: list || [] });
-});
-
-// Chi tiết lớp học + lịch học
-app.get('/lop-hoc/:ma_lop', async (req, res) => {
-  const { ma_lop } = req.params;
-  const { data: lop } = await supabase
-    .from('lop_hoc')
-    .select('*, gia_su(ho_ten, trinh_do), hoc_vien(ho_ten)')
-    .eq('ma_lop', ma_lop)
-    .single();
-
-  const { data: lichHoc } = await supabase
-    .from('lich_hoc')
-    .select('*')
-    .eq('ma_lop', ma_lop)
-    .order('thu_trong_tuan');
-
-  const { data: buoiHoc } = await supabase
-    .from('buoi_hoc')
-    .select('*')
-    .eq('ma_lop', ma_lop)
-    .order('ngay_hoc', { ascending: false });
-
-  res.render('lop-hoc-chi-tiet', { lop, lichHoc: lichHoc || [], buoiHoc: buoiHoc || [] });
-});
-
-// Thêm lịch học
-app.post('/lop-hoc/:ma_lop/them-lich', async (req, res) => {
-  const { ma_lop } = req.params;
-  const { thu_trong_tuan, gio_bat_dau, gio_ket_thuc } = req.body;
-  const ma_lich = 'LICH' + Date.now().toString(36).toUpperCase();
-
-  try {
-    await supabaseAdmin.from('lich_hoc').insert({
-      ma_lich, ma_lop,
-      thu_trong_tuan: parseInt(thu_trong_tuan),
-      gio_bat_dau, gio_ket_thuc
-    });
-    req.session.success = 'Đã thêm lịch học mới!';
-  } catch (err) {
-    req.session.error = 'Lỗi: ' + err.message + ' (Có thể bị trùng lịch giảng dạy)';
-  }
-  res.redirect('/lop-hoc/' + ma_lop);
-});
+// Lớp học router
+app.use('/lop-hoc', require('./routes/lop-hoc'));
 
 // =========================================================================
 // ROUTES - THỜI KHÓA BIỂU GIA SƯ
@@ -448,78 +288,8 @@ app.post('/danh-gia', async (req, res) => {
   res.redirect('/lop-hoc');
 });
 
-// Middleware kiểm tra admin
-function requireAdmin(req, res, next) {
-  if (!req.session.isAdmin) {
-    req.session.error = 'Bạn không có quyền truy cập trang quản trị.';
-    return res.redirect('/');
-  }
-  next();
-}
-// =========================================================================
-// ROUTES - ADMIN PANEL
-// =========================================================================
-
-// Dashboard Admin
-app.get('/admin', requireAdmin, async (req, res) => {
-  try {
-    const { data: stats } = await supabase
-      .from('vw_admin_thong_ke')
-      .select('*')
-      .single();
-
-    const { data: recentYC } = await supabase
-      .from('yeu_cau_lop')
-      .select('*, hoc_vien(ho_ten), gia_su(ho_ten)')
-      .order('ngay_yeu_cau', { ascending: false })
-      .limit(5);
-
-    const { data: recentLH } = await supabase
-      .from('lop_hoc')
-      .select('*, gia_su(ho_ten), hoc_vien(ho_ten)')
-      .order('ngay_bat_dau', { ascending: false })
-      .limit(5);
-
-    res.render('admin/index', {
-      stats: stats || {},
-      recentYC: recentYC || [],
-      recentLH: recentLH || []
-    });
-  } catch (err) {
-    console.error('Admin dashboard:', err.message);
-    res.render('admin/index', { stats: {}, recentYC: [], recentLH: [] });
-  }
-});
-
-// Admin - Quản lý yêu cầu
-app.get('/admin/yeu-cau', requireAdmin, async (req, res) => {
-  const { trang_thai, search } = req.query;
-  let query = supabase
-    .from('yeu_cau_lop')
-    .select('*, hoc_vien(ho_ten), gia_su(ho_ten)')
-    .order('ngay_yeu_cau', { ascending: false });
-
-  if (trang_thai && trang_thai !== 'all') query = query.eq('trang_thai', trang_thai);
-  if (search) query = query.or(`tieu_de.ilike.%${search}%,ma_yeu_cau.ilike.%${search}%`);
-
-  const { data: list } = await query;
-  res.render('admin/yeu-cau', { list: list || [], trang_thai: trang_thai || 'all', search: search || '' });
-});
-
-// Admin - Quản lý lớp học
-app.get('/admin/lop-hoc', requireAdmin, async (req, res) => {
-  const { trang_thai, search } = req.query;
-  let query = supabase
-    .from('lop_hoc')
-    .select('*, gia_su(ho_ten), hoc_vien(ho_ten)')
-    .order('ngay_bat_dau', { ascending: false });
-
-  if (trang_thai && trang_thai !== 'all') query = query.eq('trang_thai', trang_thai);
-  if (search) query = query.or(`ma_lop.ilike.%${search}%`);
-
-  const { data: list } = await query;
-  res.render('admin/lop-hoc', { list: list || [], trang_thai: trang_thai || 'all', search: search || '' });
-});
+// Admin router
+app.use('/admin', require('./routes/admin'));
 
 // =========================================================================
 // ROUTES - HỒ SƠ GIA SƯ

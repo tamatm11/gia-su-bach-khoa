@@ -155,8 +155,31 @@
         <div>
           <label class="text-label-md text-on-surface-variant block mb-1">Mật khẩu</label>
           <input type="password" name="password" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+          <div class="text-right mt-1">
+            <a href="#" onclick="switchAuthTab('forgot'); return false;" class="text-label-sm text-primary hover:underline">Quên mật khẩu?</a>
+          </div>
         </div>
         <button type="submit" class="btn-primary w-full py-2.5">Đăng nhập</button>
+      </form>
+    </div>
+
+    <!-- Forgot Password Panel -->
+    <div id="forgotPanel" class="tab-content">
+      <div class="mb-4 text-body-md text-on-surface-variant">
+        Nhập email của bạn để nhận liên kết đặt lại mật khẩu.
+      </div>
+      <form action="/auth/forgot-password" method="POST" class="space-y-4" id="forgotPasswordForm">
+        <div>
+          <label class="text-label-md text-on-surface-variant block mb-1">Email</label>
+          <input type="email" name="email" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+        </div>
+        <button type="submit" id="forgotSubmitBtn" class="btn-primary w-full py-2.5 flex justify-center items-center gap-2">
+          <span>Gửi liên kết</span>
+          <span class="material-symbols-outlined hidden animate-spin" id="forgotSpinner">progress_activity</span>
+        </button>
+        <div class="text-center mt-2">
+          <a href="#" onclick="switchAuthTab('login'); return false;" class="text-label-sm text-on-surface-variant hover:underline">Quay lại đăng nhập</a>
+        </div>
       </form>
     </div>
 
@@ -215,19 +238,27 @@
     const tabRegister = document.getElementById('tabRegister');
     const loginPanel = document.getElementById('loginPanel');
     const registerPanel = document.getElementById('registerPanel');
+    const forgotPanel = document.getElementById('forgotPanel');
+
+    // Reset all
+    loginPanel.classList.remove('active');
+    registerPanel.classList.remove('active');
+    if (forgotPanel) forgotPanel.classList.remove('active');
+    
+    tabLogin.className = 'flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors text-on-surface-variant hover:bg-surface-variant';
+    tabRegister.className = 'flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors text-on-surface-variant hover:bg-surface-variant';
 
     if (tab === 'login') {
       tabLogin.className = 'flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors bg-primary-container text-on-primary-container';
-      tabRegister.className = 'flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors text-on-surface-variant hover:bg-surface-variant';
       loginPanel.classList.add('active');
-      registerPanel.classList.remove('active');
       document.getElementById('authModalTitle').textContent = 'Đăng nhập';
-    } else {
+    } else if (tab === 'register') {
       tabRegister.className = 'flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors bg-primary-container text-on-primary-container';
-      tabLogin.className = 'flex-1 py-2.5 text-center rounded-lg text-label-md font-semibold transition-colors text-on-surface-variant hover:bg-surface-variant';
       registerPanel.classList.add('active');
-      loginPanel.classList.remove('active');
       document.getElementById('authModalTitle').textContent = 'Đăng ký';
+    } else if (tab === 'forgot') {
+      if (forgotPanel) forgotPanel.classList.add('active');
+      document.getElementById('authModalTitle').textContent = 'Quên mật khẩu';
     }
   }
 
@@ -256,6 +287,17 @@
     submitBtn.disabled = false;
     submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
   }
+
+  // Handle forgot password form submit
+  document.getElementById('forgotPasswordForm')?.addEventListener('submit', function() {
+    const btn = document.getElementById('forgotSubmitBtn');
+    const spinner = document.getElementById('forgotSpinner');
+    if (btn && spinner) {
+      btn.disabled = true;
+      btn.classList.add('opacity-70', 'cursor-not-allowed');
+      spinner.classList.remove('hidden');
+    }
+  });
 </script>
 
 <script>

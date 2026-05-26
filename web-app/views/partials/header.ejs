@@ -4,10 +4,14 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title><%= typeof title !== 'undefined' ? title + ' - ' : '' %>Gia Sư Bách Khoa</title>
+  <meta name="description" content="Nền tảng kết nối gia sư và học viên uy tín, chất lượng hàng đầu. Đăng yêu cầu, tìm kiếm gia sư giỏi và học trực tuyến dễ dàng."/>
+  <meta name="keywords" content="gia sư, học kèm, tìm gia sư, gia sư bách khoa, học sinh, dạy kèm"/>
+  <meta property="og:title" content="<%= typeof title !== 'undefined' ? title + ' - ' : '' %>Gia Sư Bách Khoa"/>
+  <meta property="og:description" content="Nền tảng kết nối gia sư và học viên uy tín, chất lượng hàng đầu."/>
+  <meta property="og:type" content="website"/>
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>
@@ -64,37 +68,52 @@
             "on-primary-fixed-variant": "#0040a1"
           },
           fontFamily: {
-            "headline-lg": ["Inter"],
-            "body-md": ["Inter"],
-            "label-sm": ["Inter"],
-            "label-md": ["Inter"],
-            "display-lg": ["Inter"],
-            "headline-lg-mobile": ["Inter"],
-            "body-lg": ["Inter"],
-            "headline-md": ["Inter"]
+            "headline-lg": ["Outfit", "Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "label-sm": ["Inter", "sans-serif"],
+            "label-md": ["Inter", "sans-serif"],
+            "display-lg": ["Outfit", "Inter", "sans-serif"],
+            "headline-lg-mobile": ["Outfit", "Inter", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "headline-md": ["Outfit", "Inter", "sans-serif"]
           }
         }
       }
     }
   </script>
   <style>
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --glass-shadow: 0 8px 32px rgba(0, 32, 92, 0.08);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    h1, h2, h3, h4, h5, h6, .font-display {
+      font-family: 'Outfit', sans-serif;
+    }
     .glass-panel {
-      background-color: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+      background-color: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 1.25rem;
     }
     .glass-nav {
       background-color: rgba(248, 249, 255, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     }
     .text-gradient {
-      background: linear-gradient(to right, #0040a1, #006b5c);
+      background: linear-gradient(135deg, #0040a1 0%, #006b5c 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
     }
     .btn-primary {
       background: linear-gradient(135deg, #0040a1, #0056d2);
@@ -132,17 +151,18 @@
       color: white;
     }
     .card {
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 1.25rem;
       padding: 1.5rem;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
-      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
     }
     .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 16px 32px rgba(0, 64, 161, 0.08);
+      border-color: rgba(0, 64, 161, 0.2);
     }
     .badge {
       display: inline-flex;
@@ -169,8 +189,8 @@
     /* Animations */
     .animate-on-scroll {
       opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(40px);
+      transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
     }
     .animate-on-scroll.is-visible {
       opacity: 1;
