@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
-const FileStore = require('session-file-store')(session);
+const SupabaseStore = require('./lib/supabaseStore');
 const path = require('path');
 const { supabase, supabaseAdmin } = require('./lib/supabase');
 
@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(session({
-  store: new FileStore({ path: './sessions', retries: 0 }),
+  store: new SupabaseStore(),
   secret: process.env.SESSION_SECRET || 'gia-su-bach-khoa-secret',
   resave: false,
   saveUninitialized: false,
