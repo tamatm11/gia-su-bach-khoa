@@ -84,9 +84,15 @@ app.get('/yeu-cau', async (req, res) => {
     .order('ngay_yeu_cau', { ascending: false });
 
   // Đếm số ứng tuyển cho mỗi yêu cầu
-  const { data: ungTuyenCounts } = await supabase
+  const { data: utList } = await supabase
     .from('ung_tuyen')
-    .select('ma_yeu_cau, count', { count: 'exact' });
+    .select('ma_yeu_cau');
+  const countMap = {};
+  if (utList) {
+    utList.forEach(ut => {
+      countMap[ut.ma_yeu_cau] = (countMap[ut.ma_yeu_cau] || 0) + 1;
+    });
+  }
 
   // Lấy lịch học mong muốn cụ thể
   const { data: ycLichList } = await supabaseAdmin
@@ -94,7 +100,7 @@ app.get('/yeu-cau', async (req, res) => {
     .select('*')
     .in('ma_yeu_cau', (list || []).map(y => y.ma_yeu_cau));
 
-  res.render('yeu-cau', { list: list || [], ungTuyenCounts: ungTuyenCounts || [], ycLichList: ycLichList || [] });
+  res.render('yeu-cau', { list: list || [], ungTuyenCounts: countMap, ycLichList: ycLichList || [] });
 });
 
 // Form tạo yêu cầu mới (học viên)
