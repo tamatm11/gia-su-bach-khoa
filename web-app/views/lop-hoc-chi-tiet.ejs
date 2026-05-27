@@ -104,6 +104,13 @@
                   <span class="badge badge-active"><%= thuNames[l.thu_trong_tuan] || l.thu_trong_tuan %></span>
                   <span class="text-body-md"><%= l.gio_bat_dau ? l.gio_bat_dau.substring(0,5) : '' %> - <%= l.gio_ket_thuc ? l.gio_ket_thuc.substring(0,5) : '' %></span>
                 </div>
+                <% if (role === 'gia_su' || role === 'hoc_vien') { %>
+                  <form action="/lop-hoc/<%= lop.ma_lop %>/xoa-lich/<%= l.ma_lich %>" method="POST" class="m-0" onsubmit="return confirm('Bạn có chắc chắn muốn xóa lịch học này?')">
+                    <button type="submit" class="text-error hover:text-error/80 p-1 flex items-center bg-transparent border-0 cursor-pointer">
+                      <span class="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  </form>
+                <% } %>
               </div>
             <% }); %>
           </div>

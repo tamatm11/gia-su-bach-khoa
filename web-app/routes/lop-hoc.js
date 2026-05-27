@@ -47,14 +47,34 @@ router.post('/:ma_lop/them-lich', async (req, res) => {
   const ma_lich = 'LICH' + Date.now().toString(36).toUpperCase();
 
   try {
-    await supabaseAdmin.from('lich_hoc').insert({
+    const { error } = await supabaseAdmin.from('lich_hoc').insert({
       ma_lich, ma_lop,
       thu_trong_tuan: parseInt(thu_trong_tuan),
       gio_bat_dau, gio_ket_thuc
     });
+    if (error) throw error;
     req.session.success = 'Đã thêm lịch học mới!';
   } catch (err) {
     req.session.error = 'Lỗi: ' + err.message + ' (Có thể bị trùng lịch giảng dạy)';
+  }
+  res.redirect('/lop-hoc/' + ma_lop);
+});
+
+// Xóa lịch học
+router.post('/:ma_lop/xoa-lich/:ma_lich', async (req, res) => {
+  const { ma_lop, ma_lich } = req.params;
+
+  try {
+    const { error } = await supabaseAdmin
+      .from('lich_hoc')
+      .delete()
+      .eq('ma_lop', ma_lop)
+      .eq('ma_lich', ma_lich);
+      
+    if (error) throw error;
+    req.session.success = 'Đã xóa lịch học!';
+  } catch (err) {
+    req.session.error = 'Lỗi: ' + err.message;
   }
   res.redirect('/lop-hoc/' + ma_lop);
 });
