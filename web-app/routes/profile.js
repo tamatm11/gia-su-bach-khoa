@@ -42,7 +42,6 @@ router.post('/ho-so/chinh-sua', requireLogin, async (req, res) => {
 
   let updateData = {
     ho_ten,
-    gioi_thieu: gioi_thieu || null,
     ngay_cap_nhat: new Date().toISOString()
   };
 
@@ -50,6 +49,8 @@ router.post('/ho-so/chinh-sua', requireLogin, async (req, res) => {
 
   if (isGiaSu) {
     updateData.trinh_do = trinh_do || null;
+    updateData.gioi_thieu = gioi_thieu || null;
+    updateData.so_dien_thoai = so_dien_thoai || null; // gia_su now has so_dien_thoai
   } else {
     updateData.so_dien_thoai = so_dien_thoai || null;
     updateData.khoi_hien_tai = khoi_hien_tai || null;

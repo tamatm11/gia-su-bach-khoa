@@ -5,7 +5,7 @@ const { supabase, supabaseAdmin } = require('../lib/supabase');
 router.get('/', async (req, res) => {
   if (!req.session.user) return res.redirect('/');
 
-  let query = supabase.from('lop_hoc').select('*, gia_su(ho_ten), hoc_vien(ho_ten)');
+  let query = supabaseAdmin.from('lop_hoc').select('*, gia_su(ho_ten), hoc_vien(ho_ten)');
   if (req.session.role === 'gia_su') {
     query = query.eq('ma_gia_su', req.session.user.ma_gia_su);
   } else {
@@ -19,19 +19,19 @@ router.get('/', async (req, res) => {
 // Chi tiết lớp học + lịch học
 router.get('/:ma_lop', async (req, res) => {
   const { ma_lop } = req.params;
-  const { data: lop } = await supabase
+  const { data: lop } = await supabaseAdmin
     .from('lop_hoc')
     .select('*, gia_su(ho_ten, trinh_do), hoc_vien(ho_ten)')
     .eq('ma_lop', ma_lop)
     .single();
 
-  const { data: lichHoc } = await supabase
+  const { data: lichHoc } = await supabaseAdmin
     .from('lich_hoc')
     .select('*')
     .eq('ma_lop', ma_lop)
     .order('thu_trong_tuan');
 
-  const { data: buoiHoc } = await supabase
+  const { data: buoiHoc } = await supabaseAdmin
     .from('buoi_hoc')
     .select('*')
     .eq('ma_lop', ma_lop)

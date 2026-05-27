@@ -45,7 +45,7 @@ router.post('/register', async (req, res) => {
     } else {
       const ma = 'GS' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
       const { error } = await supabaseAdmin.from('gia_su').insert({
-        ma_gia_su: ma, ho_ten, auth_id: authUserId
+        ma_gia_su: ma, ho_ten, email, so_dien_thoai: so_dien_thoai || null, auth_id: authUserId
       });
       profileErr = error;
     }

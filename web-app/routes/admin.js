@@ -77,7 +77,7 @@ router.get('/lop-hoc', async (req, res) => {
 // Admin - Quản lý gia sư
 router.get('/gia-su', async (req, res) => {
   const { search } = req.query;
-  let query = supabase.from('gia_su').select('*').order('ngay_dang_ky', { ascending: false });
+  let query = supabase.from('gia_su').select('*').order('ngay_tao', { ascending: false });
 
   if (search) query = query.or(`ho_ten.ilike.%${search}%,email.ilike.%${search}%,ma_gia_su.ilike.%${search}%`);
 
@@ -88,7 +88,7 @@ router.get('/gia-su', async (req, res) => {
 // Admin - Quản lý học viên
 router.get('/hoc-vien', async (req, res) => {
   const { search } = req.query;
-  let query = supabase.from('hoc_vien').select('*').order('ngay_dang_ky', { ascending: false });
+  let query = supabase.from('hoc_vien').select('*').order('ngay_tao', { ascending: false });
 
   if (search) query = query.or(`ho_ten.ilike.%${search}%,email.ilike.%${search}%,ma_hoc_vien.ilike.%${search}%`);
 

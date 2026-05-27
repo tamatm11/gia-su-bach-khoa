@@ -109,16 +109,24 @@ app.post('/dang-tin', async (req, res) => {
   const { tieu_de, mo_ta, tien_hoc_phi, dia_chi, hinh_thuc_hoc, so_buoi_tuan, thoi_gian_mong_muon, ma_mon } = req.body;
   const ma_yeu_cau = 'YC' + Date.now().toString(36).toUpperCase();
 
+  const parsedHocPhi = parseInt(tien_hoc_phi);
+  const parsedSoBuoi = parseInt(so_buoi_tuan);
+
+  if (isNaN(parsedHocPhi) || isNaN(parsedSoBuoi)) {
+    req.session.error = 'Học phí và số buổi phải là số hợp lệ.';
+    return res.redirect('/dang-tin');
+  }
+
   try {
     await supabaseAdmin.rpc('sp_tao_yeu_cau_lop', {
       p_ma_yeu_cau: ma_yeu_cau,
       p_ma_hoc_vien: req.session.user.ma_hoc_vien,
       p_tieu_de: tieu_de,
       p_mo_ta: mo_ta || null,
-      p_tien_hoc_phi: parseInt(tien_hoc_phi),
+      p_tien_hoc_phi: parsedHocPhi,
       p_dia_chi: dia_chi,
       p_hinh_thuc_hoc: hinh_thuc_hoc,
-      p_so_buoi_tuan: parseInt(so_buoi_tuan),
+      p_so_buoi_tuan: parsedSoBuoi,
       p_thoi_gian_mong_muon: thoi_gian_mong_muon || null
     });
 
@@ -148,7 +156,7 @@ app.get('/yeu-cau-cua-toi', async (req, res) => {
     .order('ngay_yeu_cau', { ascending: false });
 
   // Lấy danh sách ứng tuyển cho từng yêu cầu
-  const { data: utList } = await supabase
+  const { data: utList } = await supabaseAdmin
     .from('ung_tuyen')
     .select('*, gia_su(ho_ten, trinh_do, gioi_thieu)')
     .in('ma_yeu_cau', (list || []).map(y => y.ma_yeu_cau));
@@ -161,19 +169,21 @@ app.post('/chon-gia-su', async (req, res) => {
   const { ma_yeu_cau, ma_gia_su, ngay_bat_dau, tong_so_buoi } = req.body;
   try {
     // 1. Chấp nhận gia sư
-    await supabaseAdmin.rpc('sp_chon_gia_su', {
+    const { error: err1 } = await supabaseAdmin.rpc('sp_chon_gia_su', {
       p_ma_yeu_cau: ma_yeu_cau,
       p_ma_gia_su: ma_gia_su
     });
+    if (err1) throw new Error(err1.message);
 
     // 2. Tự động tạo lớp học ngay
     const ma_lop = 'LH' + Date.now().toString(36).toUpperCase();
-    await supabaseAdmin.rpc('sp_tao_lop_hoc', {
+    const { error: err2 } = await supabaseAdmin.rpc('sp_tao_lop_hoc', {
       p_ma_lop: ma_lop,
       p_ma_yeu_cau: ma_yeu_cau,
       p_ngay_bat_dau: ngay_bat_dau,
       p_tong_so_buoi: parseInt(tong_so_buoi || 24)
     });
+    if (err2) throw new Error(err2.message);
 
     req.session.success = 'Đã duyệt gia sư và tạo lớp học thành công!';
     // Redirect thẳng về trang danh sách lớp học
@@ -254,7 +264,7 @@ app.use('/lop-hoc', require('./routes/lop-hoc'));
 app.get('/lich-day', async (req, res) => {
   if (!req.session.user || req.session.role !== 'gia_su') return res.redirect('/');
 
-  const { data: lich } = await supabase
+  const { data: lich } = await supabaseAdmin
     .from('vw_lich_trinh_gia_su')
     .select('*')
     .eq('ma_gia_su', req.session.user.ma_gia_su)
@@ -326,19 +336,19 @@ app.get('/ho-so-gia-su/:ma_gia_su', async (req, res) => {
     .select('*, mon_hoc(ten_mon)')
     .eq('ma_gia_su', ma_gia_su);
 
-  const { data: lopDangDay } = await supabase
+  const { data: lopDangDay } = await supabaseAdmin
     .from('lop_hoc')
     .select('*, hoc_vien(ho_ten)')
     .eq('ma_gia_su', ma_gia_su)
     .eq('trang_thai', 'dang_hoc');
 
-  const { data: lopDaDay } = await supabase
+  const { data: lopDaDay } = await supabaseAdmin
     .from('lop_hoc')
     .select('*, hoc_vien(ho_ten)')
     .eq('ma_gia_su', ma_gia_su)
     .eq('trang_thai', 'da_hoan_thanh');
 
-  const { data: danhGia } = await supabase
+  const { data: danhGia } = await supabaseAdmin
     .from('danh_gia')
     .select('*, dang_ky(ma_lop, lop_hoc!inner(ma_gia_su, hoc_vien(ho_ten)))')
     .eq('dang_ky.lop_hoc.ma_gia_su', ma_gia_su)
