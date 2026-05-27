@@ -28,7 +28,7 @@
         </div>
         <div>
           <label class="text-label-md text-on-surface block mb-1">Số buổi/tuần <span class="text-error">*</span></label>
-          <input type="number" name="so_buoi_tuan" required min="1" max="7" value="2" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+          <input type="number" name="so_buoi_tuan" id="so-buoi-tuan" required min="1" max="7" value="2" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
         </div>
       </div>
 
@@ -42,13 +42,16 @@
         </div>
         <div>
           <label class="text-label-md text-on-surface block mb-1">Môn học chính</label>
-          <select name="ma_mon" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface">
-            <option value="MH001">Toán</option>
-            <option value="MH002">Vật Lý</option>
-            <option value="MH003">Hóa Học</option>
-            <option value="MH004">Tiếng Anh</option>
-            <option value="MH005">Ngữ Văn</option>
+          <select name="ma_mon" id="select-mon" onchange="toggleNewMonInput()" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface">
+            <% monList.forEach(function(m) { %>
+              <option value="<%= m.ma_mon %>"><%= m.ten_mon %> (<%= m.cap_hoc %>)</option>
+            <% }); %>
+            <option value="OTHER">-- Khác (Nhập môn mới) --</option>
           </select>
+          <div id="new-mon-container" class="hidden mt-2 space-y-2">
+            <input type="text" name="ten_mon_moi" id="ten-mon-moi" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface" placeholder="Nhập tên môn học mới (ví dụ: Lập trình Python, Guitar,...)"/>
+            <input type="text" name="cap_hoc_moi" id="cap-hoc-moi" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface" placeholder="Cấp học (ví dụ: Đại học, Cơ bản, Lớp 10,...)"/>
+          </div>
         </div>
       </div>
 
@@ -58,7 +61,14 @@
       </div>
 
       <div>
-        <label class="text-label-md text-on-surface block mb-1">Thời gian mong muốn</label>
+        <label class="text-label-md text-on-surface block mb-2 font-semibold">Lịch học trong tuần (chọn cụ thể) <span class="text-error">*</span></label>
+        <div id="dangTinLichHocContainer" class="space-y-3">
+          <!-- Sinh bằng Javascript -->
+        </div>
+      </div>
+
+      <div>
+        <label class="text-label-md text-on-surface block mb-1">Thời gian mong muốn (Ghi chú thêm)</label>
         <input type="text" name="thoi_gian_mong_muon" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface" placeholder="Ví dụ: Tối thứ 2-4-6 từ 18h-20h"/>
       </div>
 
@@ -66,5 +76,65 @@
     </form>
   </div>
 </section>
+
+<script>
+  function toggleNewMonInput() {
+    const select = document.getElementById('select-mon');
+    const container = document.getElementById('new-mon-container');
+    const nameInput = document.getElementById('ten-mon-moi');
+    const capInput = document.getElementById('cap-hoc-moi');
+    
+    if (select.value === 'OTHER') {
+      container.classList.remove('hidden');
+      nameInput.required = true;
+      capInput.required = true;
+    } else {
+      container.classList.add('hidden');
+      nameInput.required = false;
+      capInput.required = false;
+      nameInput.value = '';
+      capInput.value = '';
+    }
+  }
+
+  function updateDangTinLichHoc() {
+    const soBuoi = parseInt(document.getElementById('so-buoi-tuan').value) || 2;
+    const container = document.getElementById('dangTinLichHocContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    const defaultDays = [2, 4, 6, 3, 5, 7, 1]; // T2, T4, T6, T3, T5, T7, CN
+    for (let i = 0; i < soBuoi; i++) {
+      const defaultDay = defaultDays[i % defaultDays.length];
+      const slotHtml = `
+        <div class="grid grid-cols-3 gap-2 items-center bg-surface-container-low p-3 rounded-xl border border-outline-variant">
+          <div>
+            <label class="text-[11px] text-on-surface-variant block mb-1 font-medium">Buổi ${i + 1} (Thứ)</label>
+            <select name="thu_trong_tuan" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface text-sm h-[40px]">
+              <option value="2" \${defaultDay === 2 ? 'selected' : ''}>Thứ 2</option>
+              <option value="3" \${defaultDay === 3 ? 'selected' : ''}>Thứ 3</option>
+              <option value="4" \${defaultDay === 4 ? 'selected' : ''}>Thứ 4</option>
+              <option value="5" \${defaultDay === 5 ? 'selected' : ''}>Thứ 5</option>
+              <option value="6" \${defaultDay === 6 ? 'selected' : ''}>Thứ 6</option>
+              <option value="7" \${defaultDay === 7 ? 'selected' : ''}>Thứ 7</option>
+              <option value="1" \${defaultDay === 1 ? 'selected' : ''}>Chủ nhật</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[11px] text-on-surface-variant block mb-1 font-medium">Bắt đầu</label>
+            <input type="time" name="gio_bat_dau" value="18:00" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface text-sm h-[40px]"/>
+          </div>
+          <div>
+            <label class="text-[11px] text-on-surface-variant block mb-1 font-medium">Kết thúc</label>
+            <input type="time" name="gio_ket_thuc" value="20:00" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface text-sm h-[40px]"/>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', slotHtml);
+    }
+  }
+
+  document.getElementById('so-buoi-tuan').addEventListener('input', updateDangTinLichHoc);
+  updateDangTinLichHoc();
+</script>
 
 <%- include('partials/footer') %>

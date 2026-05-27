@@ -88,16 +88,31 @@ app.get('/yeu-cau', async (req, res) => {
     .from('ung_tuyen')
     .select('ma_yeu_cau, count', { count: 'exact' });
 
-  res.render('yeu-cau', { list: list || [], ungTuyenCounts: ungTuyenCounts || [] });
+  // Lấy lịch học mong muốn cụ thể
+  const { data: ycLichList } = await supabaseAdmin
+    .from('yeu_cau_lich_hoc')
+    .select('*')
+    .in('ma_yeu_cau', (list || []).map(y => y.ma_yeu_cau));
+
+  res.render('yeu-cau', { list: list || [], ungTuyenCounts: ungTuyenCounts || [], ycLichList: ycLichList || [] });
 });
 
 // Form tạo yêu cầu mới (học viên)
-app.get('/dang-tin', (req, res) => {
+app.get('/dang-tin', async (req, res) => {
   if (!req.session.user || req.session.role !== 'hoc_vien') {
     req.session.error = 'Vui lòng đăng nhập với tài khoản học viên.';
     return res.redirect('/');
   }
-  res.render('dang-tin');
+  try {
+    const { data: monList } = await supabaseAdmin
+      .from('mon_hoc')
+      .select('*')
+      .order('ten_mon');
+    res.render('dang-tin', { monList: monList || [] });
+  } catch (err) {
+    req.session.error = 'Lỗi: ' + err.message;
+    res.redirect('/');
+  }
 });
 
 // Xử lý tạo yêu cầu
@@ -106,7 +121,7 @@ app.post('/dang-tin', async (req, res) => {
     return res.redirect('/');
   }
 
-  const { tieu_de, mo_ta, tien_hoc_phi, dia_chi, hinh_thuc_hoc, so_buoi_tuan, thoi_gian_mong_muon, ma_mon } = req.body;
+  const { tieu_de, mo_ta, tien_hoc_phi, dia_chi, hinh_thuc_hoc, so_buoi_tuan, thoi_gian_mong_muon, ma_mon, ten_mon_moi, cap_hoc_moi, thu_trong_tuan, gio_bat_dau, gio_ket_thuc } = req.body;
   const ma_yeu_cau = 'YC' + Date.now().toString(36).toUpperCase();
 
   const parsedHocPhi = parseInt(tien_hoc_phi);
@@ -118,6 +133,18 @@ app.post('/dang-tin', async (req, res) => {
   }
 
   try {
+    let finalMaMon = ma_mon;
+    if (ma_mon === 'OTHER') {
+      const ma_mon_moi = 'MH' + Date.now().toString(36).toUpperCase();
+      const { error: errMon } = await supabaseAdmin.from('mon_hoc').insert({
+        ma_mon: ma_mon_moi,
+        ten_mon: ten_mon_moi,
+        cap_hoc: cap_hoc_moi || 'Khác'
+      });
+      if (errMon) throw errMon;
+      finalMaMon = ma_mon_moi;
+    }
+
     await supabaseAdmin.rpc('sp_tao_yeu_cau_lop', {
       p_ma_yeu_cau: ma_yeu_cau,
       p_ma_hoc_vien: req.session.user.ma_hoc_vien,
@@ -131,10 +158,28 @@ app.post('/dang-tin', async (req, res) => {
     });
 
     // Thêm môn học
-    if (ma_mon) {
-      await supabaseAdmin.from('yeu_cau_mon').insert({
-        ma_yeu_cau, ma_mon, vai_tro_mon: 'Chính'
+    if (finalMaMon) {
+      const { error: errYCM } = await supabaseAdmin.from('yeu_cau_mon').insert({
+        ma_yeu_cau, ma_mon: finalMaMon, vai_tro_mon: 'Chính'
       });
+      if (errYCM) throw errYCM;
+    }
+
+    // Thêm lịch học yêu cầu
+    const listThu = Array.isArray(thu_trong_tuan) ? thu_trong_tuan : (thu_trong_tuan ? [thu_trong_tuan] : []);
+    const listGioBD = Array.isArray(gio_bat_dau) ? gio_bat_dau : (gio_bat_dau ? [gio_bat_dau] : []);
+    const listGioKT = Array.isArray(gio_ket_thuc) ? gio_ket_thuc : (gio_ket_thuc ? [gio_ket_thuc] : []);
+    
+    for (let i = 0; i < listThu.length; i++) {
+      const formattedBD = listGioBD[i] && listGioBD[i].length === 5 ? listGioBD[i] + ':00' : listGioBD[i];
+      const formattedKT = listGioKT[i] && listGioKT[i].length === 5 ? listGioKT[i] + ':00' : listGioKT[i];
+      const { error: errLich } = await supabaseAdmin.from('yeu_cau_lich_hoc').insert({
+        ma_yeu_cau,
+        thu_trong_tuan: parseInt(listThu[i]),
+        gio_bat_dau: formattedBD,
+        gio_ket_thuc: formattedKT
+      });
+      if (errLich) throw errLich;
     }
 
     req.session.success = 'Đăng tin thành công! Gia sư sẽ ứng tuyển vào yêu cầu của bạn.';
@@ -161,7 +206,13 @@ app.get('/yeu-cau-cua-toi', async (req, res) => {
     .select('*, gia_su(ho_ten, trinh_do, gioi_thieu)')
     .in('ma_yeu_cau', (list || []).map(y => y.ma_yeu_cau));
 
-  res.render('yeu-cau-cua-toi', { list: list || [], utList: utList || [] });
+  // Lấy lịch học mong muốn cụ thể
+  const { data: ycLichList } = await supabaseAdmin
+    .from('yeu_cau_lich_hoc')
+    .select('*')
+    .in('ma_yeu_cau', (list || []).map(y => y.ma_yeu_cau));
+
+  res.render('yeu-cau-cua-toi', { list: list || [], utList: utList || [], ycLichList: ycLichList || [] });
 });
 
 // Học viên chọn gia sư và tự động tạo lớp học

@@ -32,6 +32,16 @@
             <div><span class="material-symbols-outlined text-[16px] align-middle">event</span> <%= yc.so_buoi_tuan %> buổi/tuần</div>
             <div><span class="material-symbols-outlined text-[16px] align-middle">school</span> <%= yc.hoc_vien ? yc.hoc_vien.khoi_hien_tai : 'N/A' %></div>
           </div>
+          <% var ycLich = ycLichList.filter(function(l) { return l.ma_yeu_cau === yc.ma_yeu_cau; }); %>
+          <% if (ycLich.length > 0) { %>
+            <div class="mb-4 text-label-md text-on-surface-variant flex flex-wrap gap-1 items-center">
+              <span class="material-symbols-outlined text-[16px] align-middle">schedule</span>
+              <% const thuNames = {1:'CN',2:'T2',3:'T3',4:'T4',5:'T5',6:'T6',7:'T7'}; %>
+              <% ycLich.forEach(function(l) { %>
+                <span class="badge badge-active text-[10px] px-2 py-0.5"><%= thuNames[l.thu_trong_tuan] %>: <%= l.gio_bat_dau.substring(0,5) %>-<%= l.gio_ket_thuc.substring(0,5) %></span>
+              <% }); %>
+            </div>
+          <% } %>
           <p class="text-label-sm text-on-surface-variant mb-1">Học viên: 
             <% if (yc.hoc_vien) { %>
               <a href="/ho-so-hoc-vien/<%= yc.ma_hoc_vien %>" class="font-bold text-primary hover:underline"><%= yc.hoc_vien.ho_ten %></a>
