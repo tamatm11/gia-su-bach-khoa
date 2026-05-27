@@ -165,14 +165,30 @@
           <h4 class="text-title-md font-bold text-on-surface">Bạn muốn duyệt gia sư này?</h4>
           <p class="text-label-sm text-on-surface-variant">Hệ thống sẽ tự động gửi thông báo đến gia sư và tạo lớp học.</p>
         </div>
-        <form action="/chon-gia-su" method="POST" class="m-0">
+        <form action="/chon-gia-su" method="POST" class="m-0 flex items-end gap-3">
           <input type="hidden" name="ma_yeu_cau" value="<%= ma_yeu_cau %>"/>
           <input type="hidden" name="ma_gia_su" value="<%= gs.ma_gia_su %>"/>
-          <button type="submit" class="btn-primary" style="padding: 12px 24px; font-size: 16px;">
+          
+          <div class="hidden sm:block">
+            <label class="text-[11px] text-on-surface-variant block mb-1">Ngày bắt đầu</label>
+            <input type="date" name="ngay_bat_dau" required id="hsNgayBatDau" class="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface text-sm h-[48px]"/>
+          </div>
+          <div class="hidden sm:block">
+            <label class="text-[11px] text-on-surface-variant block mb-1">Số buổi</label>
+            <input type="number" name="tong_so_buoi" value="24" required min="1" class="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface text-sm w-20 h-[48px]"/>
+          </div>
+
+          <button type="submit" class="btn-primary h-[48px] shrink-0" style="padding: 0 24px; font-size: 16px;">
             <span class="material-symbols-outlined align-middle mr-1 text-[20px]">check_circle</span>
-            Chọn gia sư này
+            Chọn gia sư & Tạo lớp
           </button>
         </form>
+        <script>
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const dateInput = document.getElementById('hsNgayBatDau');
+          if (dateInput) dateInput.value = tomorrow.toISOString().split('T')[0];
+        </script>
       </div>
     </div>
   <% } %>

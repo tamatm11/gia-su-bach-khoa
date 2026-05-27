@@ -154,37 +154,32 @@ app.get('/yeu-cau-cua-toi', async (req, res) => {
   res.render('yeu-cau-cua-toi', { list: list || [], utList: utList || [] });
 });
 
-// Học viên chọn gia sư
+// Học viên chọn gia sư và tự động tạo lớp học
 app.post('/chon-gia-su', async (req, res) => {
-  const { ma_yeu_cau, ma_gia_su } = req.body;
+  const { ma_yeu_cau, ma_gia_su, ngay_bat_dau, tong_so_buoi } = req.body;
   try {
+    // 1. Chấp nhận gia sư
     await supabaseAdmin.rpc('sp_chon_gia_su', {
       p_ma_yeu_cau: ma_yeu_cau,
       p_ma_gia_su: ma_gia_su
     });
-    req.session.success = 'Đã chọn gia sư thành công! Hệ thống sẽ tạo lớp học.';
-  } catch (err) {
-    req.session.error = 'Lỗi: ' + err.message;
-  }
-  res.redirect('/yeu-cau-cua-toi');
-});
 
-// Tạo lớp học từ yêu cầu đã chọn
-app.post('/tao-lop-hoc', async (req, res) => {
-  const { ma_yeu_cau, ngay_bat_dau, tong_so_buoi } = req.body;
-  const ma_lop = 'LH' + Date.now().toString(36).toUpperCase();
-  try {
+    // 2. Tự động tạo lớp học ngay
+    const ma_lop = 'LH' + Date.now().toString(36).toUpperCase();
     await supabaseAdmin.rpc('sp_tao_lop_hoc', {
       p_ma_lop: ma_lop,
       p_ma_yeu_cau: ma_yeu_cau,
       p_ngay_bat_dau: ngay_bat_dau,
-      p_tong_so_buoi: parseInt(tong_so_buoi)
+      p_tong_so_buoi: parseInt(tong_so_buoi || 24)
     });
-    req.session.success = 'Lớp học đã được tạo thành công!';
+
+    req.session.success = 'Đã duyệt gia sư và tạo lớp học thành công!';
+    // Redirect thẳng về trang danh sách lớp học
+    res.redirect('/lop-hoc');
   } catch (err) {
     req.session.error = 'Lỗi: ' + err.message;
+    res.redirect('/yeu-cau-cua-toi');
   }
-  res.redirect('/lop-hoc');
 });
 
 // =========================================================================
