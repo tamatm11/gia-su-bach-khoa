@@ -1,0 +1,69 @@
+<%- include('partials/header', { title: 'Hồ sơ Học viên' }) %>
+<%- include('partials/navbar') %>
+
+<section class="max-w-[1280px] mx-auto px-4 md:px-10 pt-8 pb-16">
+  <a href="/" class="inline-flex items-center gap-1 text-primary text-label-md mb-6 no-underline hover:underline">
+    <span class="material-symbols-outlined text-[18px]">arrow_back</span> Quay lại
+  </a>
+
+  <div class="grid lg:grid-cols-[1fr_300px] gap-8">
+    <div class="space-y-6">
+      <div class="glass-panel p-8 rounded-3xl text-center relative overflow-hidden">
+        <div class="w-24 h-24 bg-surface-dim text-primary rounded-full mx-auto flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-5xl">face</span>
+        </div>
+        <h1 class="text-headline-sm font-bold text-on-surface mb-2"><%= hv.ho_ten %></h1>
+        <p class="text-body-md text-on-surface-variant max-w-2xl mx-auto"><%= hv.gioi_thieu || 'Học viên này chưa cập nhật giới thiệu.' %></p>
+      </div>
+
+      <h2 class="text-title-lg font-bold text-on-surface mb-4">Yêu cầu lớp đang mở</h2>
+      <% if (yeuCauList && yeuCauList.length > 0) { %>
+        <div class="grid md:grid-cols-2 gap-4">
+          <% yeuCauList.forEach(function(yc) { %>
+            <div class="card relative overflow-hidden">
+              <h3 class="text-title-md font-semibold mb-2"><%= yc.tieu_de %></h3>
+              <p class="text-body-md text-on-surface-variant mb-4 line-clamp-2"><%= yc.mo_ta %></p>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="badge badge-active"><%= yc.hinh_thuc_hoc %></span>
+                <span class="badge badge-open"><%= yc.so_buoi_tuan %> buổi/tuần</span>
+              </div>
+              <div class="flex items-center justify-between mt-4">
+                <span class="text-title-md font-bold text-primary"><%= Math.round(Number(yc.tien_hoc_phi)/1000) %>k/buổi</span>
+                <% if (role === 'gia_su') { %>
+                  <a href="/yeu-cau#yc-<%= yc.ma_yeu_cau %>" class="btn-secondary no-underline" style="padding:6px 12px; font-size:12px;">Xem & Ứng tuyển</a>
+                <% } %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <p class="text-body-md text-on-surface-variant bg-surface-container-low p-6 rounded-2xl text-center">Học viên này hiện không có yêu cầu tìm gia sư nào đang mở.</p>
+      <% } %>
+    </div>
+
+    <!-- Thông tin liên hệ -->
+    <div class="space-y-6">
+      <div class="card p-6">
+        <h3 class="text-title-md font-semibold mb-4">Thông tin cơ bản</h3>
+        <ul class="space-y-4">
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-on-surface-variant">cake</span>
+            <div>
+              <p class="text-label-sm text-on-surface-variant">Ngày sinh</p>
+              <p class="text-body-md font-medium"><%= hv.ngay_sinh ? new Date(hv.ngay_sinh).toLocaleDateString('vi-VN') : 'Chưa cập nhật' %></p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-on-surface-variant">school</span>
+            <div>
+              <p class="text-label-sm text-on-surface-variant">Khối/Lớp</p>
+              <p class="text-body-md font-medium"><%= hv.khoi_hien_tai || 'Chưa cập nhật' %></p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

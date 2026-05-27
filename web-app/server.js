@@ -66,6 +66,9 @@ app.get('/', async (req, res) => {
 // Auth router
 app.use('/auth', require('./routes/auth'));
 
+// Profile router
+app.use('/', require('./routes/profile'));
+
 // =========================================================================
 // ROUTES - YÊU CẦU LỚP
 // =========================================================================
@@ -297,6 +300,7 @@ app.use('/admin', require('./routes/admin'));
 
 app.get('/ho-so-gia-su/:ma_gia_su', async (req, res) => {
   const { ma_gia_su } = req.params;
+  const { ma_yeu_cau } = req.query;
 
   const { data: gs } = await supabase
     .from('vw_gia_su_tong_hop')
@@ -337,7 +341,8 @@ app.get('/ho-so-gia-su/:ma_gia_su', async (req, res) => {
     monHoc: monHoc || [],
     lopDangDay: lopDangDay || [],
     lopDaDay: lopDaDay || [],
-    danhGia: danhGia || []
+    danhGia: danhGia || [],
+    ma_yeu_cau: ma_yeu_cau || null
   });
 });
 

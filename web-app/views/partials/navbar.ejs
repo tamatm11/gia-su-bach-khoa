@@ -31,10 +31,10 @@
     <!-- User Menu -->
     <div class="flex items-center gap-3">
       <% if (user) { %>
-        <span class="text-label-md text-on-surface-variant hidden md:inline">
-          <span class="material-symbols-outlined align-middle text-[18px]">person</span>
+        <a href="/ho-so/chinh-sua" class="text-label-md text-on-surface-variant hidden md:inline flex items-center gap-1 hover:text-primary no-underline transition-colors">
+          <span class="material-symbols-outlined text-[18px]">person</span>
           <%= user.ho_ten %>
-        </span>
+        </a>
         <% if (role === 'gia_su') { %>
           <a href="/lich-day" class="badge <%= user.trong_lich ? 'badge-open' : 'badge-closed' %> text-decoration-none">
             <span class="status-dot <%= user.trong_lich ? 'status-dot-green' : 'status-dot-yellow' %>"></span>

@@ -34,7 +34,13 @@
           <div>Học phí gốc: <strong><%= Math.round(Number(yc.tien_hoc_phi) / 1000) %>k/buổi</strong></div>
           <div>Hình thức: <strong><%= yc.hinh_thuc_hoc %></strong></div>
           <div>Số buổi: <strong><%= yc.so_buoi_tuan %>/tuần</strong></div>
-          <div>Học viên: <strong><%= yc.hoc_vien ? yc.hoc_vien.ho_ten : 'N/A' %></strong></div>
+          <div>Học viên: 
+            <% if (yc.hoc_vien) { %>
+              <a href="/ho-so-hoc-vien/<%= yc.ma_hoc_vien %>" class="font-bold text-primary hover:underline"><%= yc.hoc_vien.ho_ten %></a>
+            <% } else { %>
+              <strong>N/A</strong>
+            <% } %>
+          </div>
         </div>
 
         <div class="mt-4 pt-4 border-t border-outline-variant">

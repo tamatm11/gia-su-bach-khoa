@@ -157,6 +157,25 @@
       </div>
     </div>
   </div>
+  
+  <% if (ma_yeu_cau && role === 'hoc_vien') { %>
+    <div class="fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant p-4 z-50 shadow-[0_-4px_16px_rgba(0,0,0,0.1)]">
+      <div class="max-w-[1280px] mx-auto flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h4 class="text-title-md font-bold text-on-surface">Bạn muốn duyệt gia sư này?</h4>
+          <p class="text-label-sm text-on-surface-variant">Hệ thống sẽ tự động gửi thông báo đến gia sư và tạo lớp học.</p>
+        </div>
+        <form action="/chon-gia-su" method="POST" class="m-0">
+          <input type="hidden" name="ma_yeu_cau" value="<%= ma_yeu_cau %>"/>
+          <input type="hidden" name="ma_gia_su" value="<%= gs.ma_gia_su %>"/>
+          <button type="submit" class="btn-primary" style="padding: 12px 24px; font-size: 16px;">
+            <span class="material-symbols-outlined align-middle mr-1 text-[20px]">check_circle</span>
+            Chọn gia sư này
+          </button>
+        </form>
+      </div>
+    </div>
+  <% } %>
 </section>
 
 <%- include('partials/footer') %>

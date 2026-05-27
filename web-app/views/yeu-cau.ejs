@@ -32,7 +32,13 @@
             <div><span class="material-symbols-outlined text-[16px] align-middle">event</span> <%= yc.so_buoi_tuan %> buổi/tuần</div>
             <div><span class="material-symbols-outlined text-[16px] align-middle">school</span> <%= yc.hoc_vien ? yc.hoc_vien.khoi_hien_tai : 'N/A' %></div>
           </div>
-          <p class="text-label-sm text-on-surface-variant mb-1">Học viên: <strong><%= yc.hoc_vien ? yc.hoc_vien.ho_ten : 'N/A' %></strong></p>
+          <p class="text-label-sm text-on-surface-variant mb-1">Học viên: 
+            <% if (yc.hoc_vien) { %>
+              <a href="/ho-so-hoc-vien/<%= yc.ma_hoc_vien %>" class="font-bold text-primary hover:underline"><%= yc.hoc_vien.ho_ten %></a>
+            <% } else { %>
+              <strong>N/A</strong>
+            <% } %>
+          </p>
 
           <% if (role === 'gia_su') { %>
             <button onclick="openUngTuyenModal('<%= yc.ma_yeu_cau %>', '<%= yc.tieu_de.replace(/'/g, "\\'") %>')" class="btn-primary w-full mt-3 text-center block">

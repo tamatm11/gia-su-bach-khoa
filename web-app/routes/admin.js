@@ -74,4 +74,26 @@ router.get('/lop-hoc', async (req, res) => {
   res.render('admin/lop-hoc', { list: list || [], trang_thai: trang_thai || 'all', search: search || '' });
 });
 
+// Admin - Quản lý gia sư
+router.get('/gia-su', async (req, res) => {
+  const { search } = req.query;
+  let query = supabase.from('gia_su').select('*').order('ngay_dang_ky', { ascending: false });
+
+  if (search) query = query.or(`ho_ten.ilike.%${search}%,email.ilike.%${search}%,ma_gia_su.ilike.%${search}%`);
+
+  const { data: list } = await query;
+  res.render('admin/gia-su', { list: list || [], search: search || '' });
+});
+
+// Admin - Quản lý học viên
+router.get('/hoc-vien', async (req, res) => {
+  const { search } = req.query;
+  let query = supabase.from('hoc_vien').select('*').order('ngay_dang_ky', { ascending: false });
+
+  if (search) query = query.or(`ho_ten.ilike.%${search}%,email.ilike.%${search}%,ma_hoc_vien.ilike.%${search}%`);
+
+  const { data: list } = await query;
+  res.render('admin/hoc-vien', { list: list || [], search: search || '' });
+});
+
 module.exports = router;

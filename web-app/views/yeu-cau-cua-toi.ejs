@@ -55,7 +55,7 @@
                 <div class="flex items-start justify-between p-3 rounded-lg bg-surface-container-low">
                   <div class="flex-1">
                     <div class="flex items-center gap-2">
-                      <a href="/ho-so-gia-su/<%= ut.ma_gia_su %>" class="font-semibold text-body-md text-on-surface no-underline hover:text-primary"><%= ut.gia_su ? ut.gia_su.ho_ten : 'N/A' %></a>
+                      <a href="/ho-so-gia-su/<%= ut.ma_gia_su %>?ma_yeu_cau=<%= yc.ma_yeu_cau %>" class="font-semibold text-body-md text-on-surface no-underline hover:text-primary"><%= ut.gia_su ? ut.gia_su.ho_ten : 'N/A' %></a>
                       <span class="badge <%= ut.trang_thai === 'accepted' ? 'badge-active' : (ut.trang_thai === 'rejected' ? 'badge-closed' : 'badge-pending') %>"><%= ut.trang_thai %></span>
                     </div>
                     <p class="text-label-sm text-on-surface-variant mt-1"><%= ut.loi_nhan || 'Không có lời nhắn' %></p>
