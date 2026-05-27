@@ -133,6 +133,31 @@ app.post('/dang-tin', async (req, res) => {
   }
 
   try {
+    // Thêm lịch học yêu cầu
+    const listThu = Array.isArray(thu_trong_tuan) ? thu_trong_tuan : (thu_trong_tuan ? [thu_trong_tuan] : []);
+    const listGioBD = Array.isArray(gio_bat_dau) ? gio_bat_dau : (gio_bat_dau ? [gio_bat_dau] : []);
+    const listGioKT = Array.isArray(gio_ket_thuc) ? gio_ket_thuc : (gio_ket_thuc ? [gio_ket_thuc] : []);
+
+    // 1. Kiểm tra trùng lịch học viên trước
+    for (let i = 0; i < listThu.length; i++) {
+      const formattedBD = listGioBD[i] && listGioBD[i].length === 5 ? listGioBD[i] + ':00' : listGioBD[i];
+      const formattedKT = listGioKT[i] && listGioKT[i].length === 5 ? listGioKT[i] + ':00' : listGioKT[i];
+
+      const { data: isOverlapping, error: errCheck } = await supabaseAdmin.rpc('fn_kiem_tra_trung_lich_hoc_vien', {
+        p_ma_hoc_vien: req.session.user.ma_hoc_vien,
+        p_thu: parseInt(listThu[i]),
+        p_gio_bat_dau: formattedBD,
+        p_gio_ket_thuc: formattedKT
+      });
+
+      if (errCheck) throw errCheck;
+
+      if (isOverlapping) {
+        req.session.error = `Trùng lịch học: Bạn đã có lịch học trùng vào Thứ ${listThu[i]} từ ${listGioBD[i]} đến ${listGioKT[i]}.`;
+        return res.redirect('/dang-tin');
+      }
+    }
+
     let finalMaMon = ma_mon;
     if (ma_mon === 'OTHER') {
       const ma_mon_moi = 'MH' + Date.now().toString(36).toUpperCase();
@@ -165,11 +190,7 @@ app.post('/dang-tin', async (req, res) => {
       if (errYCM) throw errYCM;
     }
 
-    // Thêm lịch học yêu cầu
-    const listThu = Array.isArray(thu_trong_tuan) ? thu_trong_tuan : (thu_trong_tuan ? [thu_trong_tuan] : []);
-    const listGioBD = Array.isArray(gio_bat_dau) ? gio_bat_dau : (gio_bat_dau ? [gio_bat_dau] : []);
-    const listGioKT = Array.isArray(gio_ket_thuc) ? gio_ket_thuc : (gio_ket_thuc ? [gio_ket_thuc] : []);
-    
+    // Ghi lịch học vào database
     for (let i = 0; i < listThu.length; i++) {
       const formattedBD = listGioBD[i] && listGioBD[i].length === 5 ? listGioBD[i] + ':00' : listGioBD[i];
       const formattedKT = listGioKT[i] && listGioKT[i].length === 5 ? listGioKT[i] + ':00' : listGioKT[i];
