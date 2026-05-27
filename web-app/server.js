@@ -221,7 +221,7 @@ app.post('/dang-tin', async (req, res) => {
 app.get('/yeu-cau-cua-toi', async (req, res) => {
   if (!req.session.user || req.session.role !== 'hoc_vien') return res.redirect('/');
 
-  const { data: list } = await supabase
+  const { data: list } = await supabaseAdmin
     .from('yeu_cau_lop')
     .select('*')
     .eq('ma_hoc_vien', req.session.user.ma_hoc_vien)
