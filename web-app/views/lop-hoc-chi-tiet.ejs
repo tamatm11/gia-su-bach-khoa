@@ -19,8 +19,8 @@
       <div class="flex flex-wrap items-start justify-between gap-2 mb-4">
         <div>
           <h1 class="text-headline-md text-on-surface mb-1">Chi tiết lớp <%= lop.ma_lop %></h1>
-          <span class="badge <%= lop.trang_thai === 'dang_hoc' ? 'badge-active' : (lop.trang_thai === 'da_hoan_thanh' ? 'badge-open' : 'badge-pending') %>">
-            <%= lop.trang_thai === 'dang_hoc' ? 'Đang học' : (lop.trang_thai === 'da_hoan_thanh' ? 'Hoàn thành' : lop.trang_thai) %>
+          <span class="badge <%= lop.trang_thai === 'dang_hoc' ? 'badge-active' : (lop.trang_thai === 'da_hoan_thanh' ? 'badge-open' : (lop.trang_thai === 'SapMo' ? 'badge-pending' : 'badge-closed')) %>">
+            <%= lop.trang_thai === 'dang_hoc' ? 'Đang học' : (lop.trang_thai === 'da_hoan_thanh' ? 'Hoàn thành' : (lop.trang_thai === 'SapMo' ? 'Sắp mở' : (lop.trang_thai === 'da_huy' ? 'Đã hủy' : lop.trang_thai))) %>
           </span>
         </div>
       </div>

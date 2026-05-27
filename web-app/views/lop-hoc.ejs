@@ -27,8 +27,8 @@
       <% list.forEach(function(lop) { %>
         <a href="/lop-hoc/<%= lop.ma_lop %>" class="card no-underline text-on-surface block">
           <div class="flex items-start justify-between mb-3">
-            <span class="badge <%= lop.trang_thai === 'dang_hoc' ? 'badge-active' : (lop.trang_thai === 'da_hoan_thanh' ? 'badge-open' : 'badge-pending') %>">
-              <%= lop.trang_thai === 'dang_hoc' ? 'Đang học' : (lop.trang_thai === 'da_hoan_thanh' ? 'Hoàn thành' : lop.trang_thai) %>
+            <span class="badge <%= lop.trang_thai === 'dang_hoc' ? 'badge-active' : (lop.trang_thai === 'da_hoan_thanh' ? 'badge-open' : (lop.trang_thai === 'SapMo' ? 'badge-pending' : 'badge-closed')) %>">
+              <%= lop.trang_thai === 'dang_hoc' ? 'Đang học' : (lop.trang_thai === 'da_hoan_thanh' ? 'Hoàn thành' : (lop.trang_thai === 'SapMo' ? 'Sắp mở' : (lop.trang_thai === 'da_huy' ? 'Đã hủy' : lop.trang_thai))) %>
             </span>
           </div>
           <h3 class="text-body-lg font-semibold mb-2">Lớp <%= lop.ma_lop %></h3>

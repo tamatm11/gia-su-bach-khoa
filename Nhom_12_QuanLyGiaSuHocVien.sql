@@ -322,7 +322,7 @@ BEGIN
         JOIN lop_hoc l ON lh.ma_lop = l.ma_lop
         WHERE l.ma_gia_su = @p_ma_gia_su
           AND lh.thu_trong_tuan = @p_thu
-          AND l.trang_thai IN ('SapMo', 'Active')
+          AND l.trang_thai IN ('SapMo', 'dang_hoc')
           AND (@p_ma_lop_exclude IS NULL OR l.ma_lop != @p_ma_lop_exclude)
           AND (@p_gio_bat_dau < lh.gio_ket_thuc AND @p_gio_ket_thuc > lh.gio_bat_dau)
     )
@@ -340,7 +340,7 @@ BEGIN
     DECLARE @v_so_lop INT;
     SELECT @v_so_lop = COUNT(*)
     FROM lop_hoc
-    WHERE ma_gia_su = @p_ma_gia_su AND trang_thai IN ('SapMo', 'Active');
+    WHERE ma_gia_su = @p_ma_gia_su AND trang_thai IN ('SapMo', 'dang_hoc');
 
     RETURN @v_so_lop;
 END;
@@ -398,7 +398,7 @@ RETURN (
     JOIN lop_hoc l ON lh.ma_lop = l.ma_lop
     WHERE l.ma_gia_su = @p_ma_gia_su
       AND lh.thu_trong_tuan = @p_thu
-      AND l.trang_thai IN ('SapMo', 'Active')
+      AND l.trang_thai IN ('SapMo', 'dang_hoc')
 );
 GO
 
@@ -664,7 +664,7 @@ SELECT
 FROM lich_hoc lh
 JOIN lop_hoc l ON lh.ma_lop = l.ma_lop
 JOIN gia_su gs ON l.ma_gia_su = gs.ma_gia_su
-WHERE l.trang_thai IN ('SapMo', 'Active');
+WHERE l.trang_thai IN ('SapMo', 'dang_hoc');
 GO
 
 CREATE OR ALTER VIEW vw_thong_ke_doanh_thu AS
@@ -698,7 +698,7 @@ SELECT
     (SELECT STRING_AGG(mh.ten_mon, ', ') FROM yeu_cau_mon ycm JOIN mon_hoc mh ON ycm.ma_mon = mh.ma_mon WHERE ycm.ma_yeu_cau = yc.ma_yeu_cau) AS cac_mon_hoc
 FROM yeu_cau_lop yc
 JOIN hoc_vien hv ON yc.ma_hoc_vien = hv.ma_hoc_vien
-WHERE yc.trang_thai IN ('open', 'approved');
+WHERE yc.trang_thai = 'open';
 GO
 
 IF OBJECT_ID(N'dbo.sp_tao_yeu_cau_lop', N'P') IS NOT NULL

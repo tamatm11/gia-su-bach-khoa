@@ -47,7 +47,7 @@ app.get('/', async (req, res) => {
     const { data: yeuCauList } = await supabase
       .from('yeu_cau_lop')
       .select('*, hoc_vien(ho_ten, khoi_hien_tai)')
-      .in('trang_thai', ['open', 'approved'])
+      .eq('trang_thai', 'open')
       .order('ngay_yeu_cau', { ascending: false })
       .limit(6);
 
@@ -80,7 +80,7 @@ app.get('/yeu-cau', async (req, res) => {
   const { data: list } = await supabase
     .from('yeu_cau_lop')
     .select('*, hoc_vien(ho_ten, khoi_hien_tai)')
-    .in('trang_thai', ['open', 'approved'])
+    .eq('trang_thai', 'open')
     .order('ngay_yeu_cau', { ascending: false });
 
   // Đếm số ứng tuyển cho mỗi yêu cầu
@@ -166,7 +166,17 @@ app.get('/yeu-cau-cua-toi', async (req, res) => {
 
 // Học viên chọn gia sư và tự động tạo lớp học
 app.post('/chon-gia-su', async (req, res) => {
-  const { ma_yeu_cau, ma_gia_su, ngay_bat_dau, tong_so_buoi } = req.body;
+  let { ma_yeu_cau, ma_gia_su, ngay_bat_dau, tong_so_buoi } = req.body;
+
+  // Đảm bảo ngày bắt đầu hợp lệ (mặc định là ngày mai nếu trống)
+  if (!ngay_bat_dau || ngay_bat_dau.trim() === '') {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    ngay_bat_dau = tomorrow.toISOString().split('T')[0];
+  }
+
+  const parsedTongSoBuoi = parseInt(tong_so_buoi) || 24;
+
   try {
     // 1. Chấp nhận gia sư
     const { error: err1 } = await supabaseAdmin.rpc('sp_chon_gia_su', {
@@ -181,7 +191,7 @@ app.post('/chon-gia-su', async (req, res) => {
       p_ma_lop: ma_lop,
       p_ma_yeu_cau: ma_yeu_cau,
       p_ngay_bat_dau: ngay_bat_dau,
-      p_tong_so_buoi: parseInt(tong_so_buoi || 24)
+      p_tong_so_buoi: parsedTongSoBuoi
     });
     if (err2) throw new Error(err2.message);
 
