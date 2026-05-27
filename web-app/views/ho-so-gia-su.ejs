@@ -163,35 +163,102 @@
       <div class="max-w-[1280px] mx-auto flex flex-wrap items-center justify-between gap-4">
         <div>
           <h4 class="text-title-md font-bold text-on-surface">Bạn muốn duyệt gia sư này?</h4>
-          <p class="text-label-sm text-on-surface-variant">Hệ thống sẽ tự động gửi thông báo đến gia sư và tạo lớp học.</p>
+          <p class="text-label-sm text-on-surface-variant">Hệ thống sẽ tự động tạo lớp học và lưu lịch giảng dạy.</p>
         </div>
-        <form action="/chon-gia-su" method="POST" class="m-0 flex items-end gap-3">
-          <input type="hidden" name="ma_yeu_cau" value="<%= ma_yeu_cau %>"/>
-          <input type="hidden" name="ma_gia_su" value="<%= gs.ma_gia_su %>"/>
-          
-          <div class="hidden sm:block">
-            <label class="text-[11px] text-on-surface-variant block mb-1">Ngày bắt đầu</label>
-            <input type="date" name="ngay_bat_dau" required id="hsNgayBatDau" class="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface text-sm h-[48px]"/>
-          </div>
-          <div class="hidden sm:block">
-            <label class="text-[11px] text-on-surface-variant block mb-1">Số buổi</label>
-            <input type="number" name="tong_so_buoi" value="24" required min="1" class="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface text-sm w-20 h-[48px]"/>
-          </div>
-
-          <button type="submit" class="btn-primary h-[48px] shrink-0" style="padding: 0 24px; font-size: 16px;">
-            <span class="material-symbols-outlined align-middle mr-1 text-[20px]">check_circle</span>
-            Chọn gia sư & Tạo lớp
-          </button>
-        </form>
-        <script>
-          const tomorrow = new Date();
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          const dateInput = document.getElementById('hsNgayBatDau');
-          if (dateInput) dateInput.value = tomorrow.toISOString().split('T')[0];
-        </script>
+        <button type="button" onclick="openDuyetModal('<%= ma_yeu_cau %>', '<%= gs.ma_gia_su %>', '<%= gs.ho_ten.replace(/'/g, `\\'`) %>', <%= yc ? yc.so_buoi_tuan : 2 %>)" class="btn-primary h-[48px] shrink-0" style="padding: 0 24px; font-size: 16px;">
+          <span class="material-symbols-outlined align-middle mr-1 text-[20px]">check_circle</span>
+          Chọn gia sư & Tạo lớp
+        </button>
       </div>
     </div>
-  <% } %>
+
+    <!-- Modal Duyệt Gia Sư -->
+    <div id="duyetModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div class="glass-panel rounded-2xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-headline-md">Xác nhận duyệt gia sư</h3>
+          <button onclick="closeDuyetModal()" class="text-on-surface-variant hover:text-on-surface">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form action="/chon-gia-su" method="POST">
+          <input type="hidden" name="ma_yeu_cau" id="duyetMaYeuCau"/>
+          <input type="hidden" name="ma_gia_su" id="duyetMaGiaSu"/>
+          <div class="space-y-4 text-left">
+            <p class="text-body-md text-on-surface-variant mb-2">Bạn đang duyệt gia sư <strong id="duyetTenGiaSu" class="text-primary"></strong>. Vui lòng chọn thời gian và lịch học cụ thể:</p>
+            
+            <div>
+              <label class="text-label-sm text-on-surface-variant block mb-1 font-medium">Ngày bắt đầu dự kiến</label>
+              <input type="date" name="ngay_bat_dau" id="duyetNgayBatDau" required class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+            </div>
+            <div>
+              <label class="text-label-sm text-on-surface-variant block mb-1 font-medium">Tổng số buổi</label>
+              <input type="number" name="tong_so_buoi" value="24" required min="1" class="w-full px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface"/>
+            </div>
+
+            <div>
+              <label class="text-label-sm text-on-surface-variant block mb-2 font-semibold">Lịch học trong tuần (chọn cụ thể)</label>
+              <div id="duyetLichHocContainer" class="space-y-3">
+                <!-- Sinh động bằng Javascript -->
+              </div>
+            </div>
+            
+            <button type="submit" class="btn-primary w-full mt-2">Duyệt & Tạo lớp học</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script>
+      function openDuyetModal(maYc, maGs, tenGs, soBuoiTuan) {
+        document.getElementById('duyetMaYeuCau').value = maYc;
+        document.getElementById('duyetMaGiaSu').value = maGs;
+        document.getElementById('duyetTenGiaSu').textContent = tenGs;
+        
+        // Set default date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('duyetNgayBatDau').value = tomorrow.toISOString().split('T')[0];
+
+        // Sinh bộ chọn lịch học động dựa trên soBuoiTuan
+        const container = document.getElementById('duyetLichHocContainer');
+        container.innerHTML = '';
+        const defaultDays = [2, 4, 6, 3, 5, 7, 1]; // T2, T4, T6, T3, T5, T7, CN
+        const parsedSoBuoiTuan = parseInt(soBuoiTuan) || 2;
+        for (let i = 0; i < parsedSoBuoiTuan; i++) {
+          const defaultDay = defaultDays[i % defaultDays.length];
+          const slotHtml = `
+            <div class="grid grid-cols-3 gap-2 items-center bg-surface-container-low p-2 rounded-lg border border-outline-variant">
+              <div>
+                <label class="text-[10px] text-on-surface-variant block mb-0.5 font-medium">Buổi ${i + 1} (Thứ)</label>
+                <select name="thu_trong_tuan" required class="w-full px-2 py-1.5 border border-outline-variant rounded bg-surface-container-lowest text-on-surface text-xs h-[32px]">
+                  <option value="2" ${defaultDay === 2 ? 'selected' : ''}>Thứ 2</option>
+                  <option value="3" ${defaultDay === 3 ? 'selected' : ''}>Thứ 3</option>
+                  <option value="4" ${defaultDay === 4 ? 'selected' : ''}>Thứ 4</option>
+                  <option value="5" ${defaultDay === 5 ? 'selected' : ''}>Thứ 5</option>
+                  <option value="6" ${defaultDay === 6 ? 'selected' : ''}>Thứ 6</option>
+                  <option value="7" ${defaultDay === 7 ? 'selected' : ''}>Thứ 7</option>
+                  <option value="1" ${defaultDay === 1 ? 'selected' : ''}>Chủ nhật</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[10px] text-on-surface-variant block mb-0.5 font-medium">Bắt đầu</label>
+                <input type="time" name="gio_bat_dau" value="18:00" required class="w-full px-2 py-1.5 border border-outline-variant rounded bg-surface-container-lowest text-on-surface text-xs h-[32px]"/>
+              </div>
+              <div>
+                <label class="text-[10px] text-on-surface-variant block mb-0.5 font-medium">Kết thúc</label>
+                <input type="time" name="gio_ket_thuc" value="20:00" required class="w-full px-2 py-1.5 border border-outline-variant rounded bg-surface-container-lowest text-on-surface text-xs h-[32px]"/>
+              </div>
+            </div>
+          `;
+          container.insertAdjacentHTML('beforeend', slotHtml);
+        }
+        
+        document.getElementById('duyetModal').classList.remove('hidden');
+      }
+      function closeDuyetModal() {
+        document.getElementById('duyetModal').classList.add('hidden');
+      }
+    </script>
 </section>
 
 <%- include('partials/footer') %>

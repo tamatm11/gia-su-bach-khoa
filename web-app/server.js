@@ -166,7 +166,7 @@ app.get('/yeu-cau-cua-toi', async (req, res) => {
 
 // Học viên chọn gia sư và tự động tạo lớp học
 app.post('/chon-gia-su', async (req, res) => {
-  let { ma_yeu_cau, ma_gia_su, ngay_bat_dau, tong_so_buoi } = req.body;
+  let { ma_yeu_cau, ma_gia_su, ngay_bat_dau, tong_so_buoi, thu_trong_tuan, gio_bat_dau, gio_ket_thuc } = req.body;
 
   // Đảm bảo ngày bắt đầu hợp lệ (mặc định là ngày mai nếu trống)
   if (!ngay_bat_dau || ngay_bat_dau.trim() === '') {
@@ -177,30 +177,36 @@ app.post('/chon-gia-su', async (req, res) => {
 
   const parsedTongSoBuoi = parseInt(tong_so_buoi) || 24;
 
-  try {
-    // 1. Chấp nhận gia sư
-    const { error: err1 } = await supabaseAdmin.rpc('sp_chon_gia_su', {
-      p_ma_yeu_cau: ma_yeu_cau,
-      p_ma_gia_su: ma_gia_su
-    });
-    if (err1) throw new Error(err1.message);
+  // Trích xuất và định dạng các mảng lịch học
+  const listThu = Array.isArray(thu_trong_tuan) ? thu_trong_tuan : (thu_trong_tuan ? [thu_trong_tuan] : []);
+  const listGioBD = Array.isArray(gio_bat_dau) ? gio_bat_dau : (gio_bat_dau ? [gio_bat_dau] : []);
+  const listGioKT = Array.isArray(gio_ket_thuc) ? gio_ket_thuc : (gio_ket_thuc ? [gio_ket_thuc] : []);
 
-    // 2. Tự động tạo lớp học ngay
+  const formattedGioBD = listGioBD.map(t => t && t.length === 5 ? t + ':00' : t);
+  const formattedGioKT = listGioKT.map(t => t && t.length === 5 ? t + ':00' : t);
+
+  try {
     const ma_lop = 'LH' + Date.now().toString(36).toUpperCase();
-    const { error: err2 } = await supabaseAdmin.rpc('sp_tao_lop_hoc', {
+    
+    // Gọi stored procedure duy nhất đảm bảo tính nguyên tử (atomic transaction)
+    const { error } = await supabaseAdmin.rpc('sp_chon_gia_su_va_tao_lop_va_lich', {
       p_ma_lop: ma_lop,
       p_ma_yeu_cau: ma_yeu_cau,
+      p_ma_gia_su: ma_gia_su,
       p_ngay_bat_dau: ngay_bat_dau,
-      p_tong_so_buoi: parsedTongSoBuoi
+      p_tong_so_buoi: parsedTongSoBuoi,
+      p_list_thu: listThu.map(x => parseInt(x)),
+      p_list_gio_bd: formattedGioBD,
+      p_list_gio_kt: formattedGioKT
     });
-    if (err2) throw new Error(err2.message);
+    
+    if (error) throw new Error(error.message);
 
-    req.session.success = 'Đã duyệt gia sư và tạo lớp học thành công!';
-    // Redirect thẳng về trang danh sách lớp học
+    req.session.success = 'Đã duyệt gia sư và tạo lớp học kèm lịch học thành công!';
     res.redirect('/lop-hoc');
   } catch (err) {
     req.session.error = 'Lỗi: ' + err.message;
-    res.redirect('/yeu-cau-cua-toi');
+    res.redirect(req.headers.referer || '/yeu-cau-cua-toi');
   }
 });
 
@@ -364,13 +370,24 @@ app.get('/ho-so-gia-su/:ma_gia_su', async (req, res) => {
     .eq('dang_ky.lop_hoc.ma_gia_su', ma_gia_su)
     .order('ngay_danh_gia', { ascending: false });
 
+  let yc = null;
+  if (ma_yeu_cau) {
+    const { data: ycData } = await supabaseAdmin
+      .from('yeu_cau_lop')
+      .select('*')
+      .eq('ma_yeu_cau', ma_yeu_cau)
+      .single();
+    yc = ycData || null;
+  }
+
   res.render('ho-so-gia-su', {
     gs,
     monHoc: monHoc || [],
     lopDangDay: lopDangDay || [],
     lopDaDay: lopDaDay || [],
     danhGia: danhGia || [],
-    ma_yeu_cau: ma_yeu_cau || null
+    ma_yeu_cau: ma_yeu_cau || null,
+    yc
   });
 });
 
