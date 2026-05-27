@@ -54,3 +54,6 @@ bao_cao_gia_su_images/
 *.temp
 erd_gia_su_fixed_2.html
 stitch_gia_s_b_ch_khoa_platform/
+
+# Sessions
+sessions/

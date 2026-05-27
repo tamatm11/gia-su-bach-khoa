@@ -15,6 +15,11 @@
   <% if (utList && utList.length > 0) { %>
     <% utList.forEach(function(ut) { %>
       <% var yc = ut.yeu_cau_lop; %>
+      <% if (!yc) { %>
+        <div class="card mb-6 bg-surface-container">
+          <p class="text-on-surface-variant">Yêu cầu này đã bị xóa hoặc không còn tồn tại.</p>
+        </div>
+      <% } else { %>
       <div class="card mb-6">
         <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
           <div class="flex items-center gap-2">
@@ -57,6 +62,7 @@
           <% } %>
         </div>
       </div>
+      <% } %>
     <% }); %>
   <% } else { %>
     <div class="glass-panel rounded-2xl p-12 text-center">

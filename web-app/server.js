@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const FileStore = require('session-file-store')(session);
 const path = require('path');
 const { supabase, supabaseAdmin } = require('./lib/supabase');
 
@@ -15,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(session({
+  store: new FileStore({ path: './sessions', retries: 0 }),
   secret: process.env.SESSION_SECRET || 'gia-su-bach-khoa-secret',
   resave: false,
   saveUninitialized: false,
@@ -218,13 +220,24 @@ app.post('/ung-tuyen', async (req, res) => {
 app.get('/lop-da-ung-tuyen', async (req, res) => {
   if (!req.session.user || req.session.role !== 'gia_su') return res.redirect('/');
 
-  const { data: utList } = await supabase
-    .from('ung_tuyen')
-    .select('*, yeu_cau_lop(*, hoc_vien(ho_ten))')
-    .eq('ma_gia_su', req.session.user.ma_gia_su)
-    .order('ngay_ung_tuyen', { ascending: false });
+  try {
+    const { data: utList, error } = await supabaseAdmin
+      .from('ung_tuyen')
+      .select('*, yeu_cau_lop(*, hoc_vien(ho_ten))')
+      .eq('ma_gia_su', req.session.user.ma_gia_su)
+      .order('ngay_ung_tuyen', { ascending: false });
 
-  res.render('lop-da-ung-tuyen', { utList: utList || [] });
+    if (error) {
+      console.error('Error fetching lop-da-ung-tuyen:', error);
+      req.session.error = 'Có lỗi xảy ra khi tải danh sách.';
+      return res.redirect('/');
+    }
+
+    res.render('lop-da-ung-tuyen', { utList: utList || [] });
+  } catch (err) {
+    console.error('Exception in /lop-da-ung-tuyen:', err);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 // =========================================================================
