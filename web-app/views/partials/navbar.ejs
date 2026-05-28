@@ -1,125 +1,272 @@
-<nav class="glass-nav fixed top-0 left-0 right-0 z-50 h-[68px] flex items-center">
-  <div class="max-w-[1280px] mx-auto w-full px-4 md:px-10 flex items-center justify-between">
+<% 
+  // Helpers
+  function getInitials(name) {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
+  function capitalizeName(name) {
+    if (!name) return '';
+    return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+  }
+%>
+<nav class="glass-nav fixed top-0 left-0 right-0 z-50 h-[76px] flex items-center transition-all duration-300">
+  <div class="max-w-[1280px] mx-auto w-full px-4 md:px-8 flex items-center justify-between">
     <!-- Logo -->
-    <a href="/" class="flex items-center gap-3 no-underline group">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="200" height="42">
+    <a href="/" class="flex items-center gap-3 no-underline group hover:opacity-90 transition-opacity">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="220" height="46">
         <rect width="280" height="60" fill="none"/>
         <path d="M22 18 L32 12 L42 18 L42 36 L32 42 L22 36 Z" fill="#0040a1"/>
         <path d="M25 21 L32 16 L39 21 L39 33 L32 38 L25 33 Z" fill="#FFFFFF"/>
-        <text x="55" y="38" font-family="Outfit,Inter,sans-serif" font-weight="700" font-size="18" fill="#0040a1">Gia Sư Bách Khoa</text>
+        <text x="55" y="38" font-family="Outfit,Inter,sans-serif" font-weight="800" font-size="20" fill="#0040a1">Gia Sư Bách Khoa</text>
       </svg>
     </a>
 
     <!-- Nav Links (desktop) -->
-    <div class="hidden md:flex items-center gap-0.5" id="navLinks">
-      <a href="/" class="nav-item px-3.5 py-2 text-on-surface-variant hover:text-primary rounded-lg text-[13.5px] font-medium transition-all hover:bg-primary/6">Trang chủ</a>
-      <a href="/yeu-cau" class="nav-item px-3.5 py-2 text-on-surface-variant hover:text-primary rounded-lg text-[13.5px] font-medium transition-all hover:bg-primary/6">Yêu cầu lớp</a>
+    <div class="hidden md:flex items-center gap-1" id="navLinks">
+      <a href="/" class="nav-item relative px-4 py-2.5 text-on-surface-variant hover:text-primary rounded-xl text-[14px] font-semibold transition-all hover:bg-primary/5">Trang chủ</a>
+      <a href="/yeu-cau" class="nav-item relative px-4 py-2.5 text-on-surface-variant hover:text-primary rounded-xl text-[14px] font-semibold transition-all hover:bg-primary/5">Yêu cầu lớp</a>
       <% if (role === 'gia_su') { %>
-        <a href="/lop-da-ung-tuyen" class="nav-item px-3.5 py-2 text-on-surface-variant hover:text-primary rounded-lg text-[13.5px] font-medium transition-all hover:bg-primary/6">Đã ứng tuyển</a>
-        <a href="/lop-hoc" class="nav-item px-3.5 py-2 text-on-surface-variant hover:text-primary rounded-lg text-[13.5px] font-medium transition-all hover:bg-primary/6">Lớp của tôi</a>
-        <a href="/lich-day" class="nav-item px-3.5 py-2 text-on-surface-variant hover:text-primary rounded-lg text-[13.5px] font-medium transition-all hover:bg-primary/6">Lịch dạy</a>
+        <a href="/lop-da-ung-tuyen" class="nav-item relative px-4 py-2.5 text-on-surface-variant hover:text-primary rounded-xl text-[14px] font-semibold transition-all hover:bg-primary/5">Đã ứng tuyển</a>
+        <a href="/lop-hoc" class="nav-item relative px-4 py-2.5 text-on-surface-variant hover:text-primary rounded-xl text-[14px] font-semibold transition-all hover:bg-primary/5">Lớp của tôi</a>
+        <a href="/lich-day" class="nav-item relative px-4 py-2.5 text-on-surface-variant hover:text-primary rounded-xl text-[14px] font-semibold transition-all hover:bg-primary/5">Lịch dạy</a>
       <% } else if (role === 'hoc_vien') { %>
-        <a href="/dang-tin" class="nav-item px-3.5 py-2 text-on-surface-variant hover:text-primary rounded-lg text-[13.5px] font-medium transition-all hover:bg-primary/6">Đăng tin</a>
-        <a href="/yeu-cau-cua-toi" class="nav-item px-3.5 py-2 text-on-surface-variant hover:text-primary rounded-lg text-[13.5px] font-medium transition-all hover:bg-primary/6">Yêu cầu của tôi</a>
-        <a href="/lop-hoc" class="nav-item px-3.5 py-2 text-on-surface-variant hover:text-primary rounded-lg text-[13.5px] font-medium transition-all hover:bg-primary/6">Lớp học</a>
+        <a href="/dang-tin" class="nav-item relative px-4 py-2.5 text-on-surface-variant hover:text-primary rounded-xl text-[14px] font-semibold transition-all hover:bg-primary/5">Đăng tin</a>
+        <a href="/yeu-cau-cua-toi" class="nav-item relative px-4 py-2.5 text-on-surface-variant hover:text-primary rounded-xl text-[14px] font-semibold transition-all hover:bg-primary/5">Yêu cầu của tôi</a>
+        <a href="/lop-hoc" class="nav-item relative px-4 py-2.5 text-on-surface-variant hover:text-primary rounded-xl text-[14px] font-semibold transition-all hover:bg-primary/5">Lớp học</a>
       <% } %>
       <% if (isAdmin) { %>
-        <a href="/admin" class="nav-item px-3.5 py-2 text-error hover:text-error rounded-lg text-[13.5px] font-semibold transition-all hover:bg-error/6">Quản trị</a>
+        <a href="/admin" class="nav-item relative px-4 py-2.5 text-error hover:text-error rounded-xl text-[14px] font-bold transition-all hover:bg-error/10">Quản trị</a>
       <% } %>
     </div>
 
     <!-- Right side -->
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-4">
       <% if (user) { %>
         <!-- Notifications -->
-        <div class="relative notification-container">
-          <button id="notifBell" class="relative p-2 text-on-surface-variant hover:text-primary rounded-full hover:bg-primary/8 transition-all focus:outline-none flex items-center justify-center">
-            <span class="material-symbols-outlined text-[22px]">notifications</span>
+        <div class="relative notification-container flex items-center">
+          <button id="notifBell" class="relative p-2.5 text-on-surface-variant hover:text-primary rounded-full hover:bg-primary/10 transition-all focus:outline-none flex items-center justify-center">
+            <span class="material-symbols-outlined text-[24px]">notifications</span>
             <% if (unreadCount > 0) { %>
-              <span class="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] px-1 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center" style="line-height:1;">
-                <%= unreadCount %>
+              <span class="absolute top-[2px] right-[2px] min-w-[20px] h-[20px] px-1 bg-error text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-sm border-2 border-white">
+                <%= unreadCount > 99 ? '99+' : unreadCount %>
               </span>
             <% } %>
           </button>
-          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl shadow-2xl z-50 overflow-hidden" style="box-shadow:0 20px 60px rgba(0,32,92,0.15);">
-            <div class="px-4 py-3 border-b border-outline-variant/50 flex items-center justify-between bg-surface-container-low/80">
-              <span class="text-[13px] font-semibold text-on-surface">Thông báo</span>
+          
+          <!-- Dropdown Notifications -->
+          <div id="notifDropdown" class="hidden absolute top-full right-0 mt-3 w-80 sm:w-96 bg-white border border-outline-variant/30 rounded-2xl z-50 overflow-hidden" style="box-shadow: 0 10px 40px -10px rgba(0,32,92,0.15), 0 0 10px rgba(0,32,92,0.05); backdrop-filter: blur(20px);">
+            <div class="px-5 py-4 border-b border-outline-variant/20 flex items-center justify-between bg-surface-container-lowest">
+              <h3 class="text-[15px] font-bold text-on-surface m-0">Thông báo</h3>
               <% if (unreadCount > 0) { %>
-                <button id="markAllRead" class="text-[11px] text-primary hover:underline font-semibold focus:outline-none bg-transparent border-0 cursor-pointer">Đọc tất cả</button>
+                <button id="markAllRead" class="text-[12px] text-primary hover:text-primary-dark font-semibold focus:outline-none bg-transparent border-0 cursor-pointer transition-colors">Đánh dấu đã đọc</button>
               <% } %>
             </div>
-            <div class="max-h-[320px] overflow-y-auto divide-y divide-outline-variant/40" id="notifList">
+            <div class="max-h-[360px] overflow-y-auto divide-y divide-outline-variant/10 bg-white" id="notifList">
               <% if (notifications && notifications.length > 0) { %>
                 <% notifications.forEach(function(n) { %>
-                  <a href="/thong-bao/read/<%= n.ma_thong_bao %>" class="block px-4 py-3 hover:bg-surface-container-low no-underline transition-colors <%= n.da_doc ? 'opacity-65' : 'bg-primary/4' %>">
-                    <p class="text-[13px] text-on-surface leading-snug font-medium"><%= n.tieu_de %></p>
-                    <p class="text-[12px] text-on-surface-variant mt-0.5 line-clamp-2"><%= n.noi_dung %></p>
-                    <p class="text-[10px] text-on-surface-variant/70 mt-1.5"><%= new Date(n.ngay_tao).toLocaleString('vi-VN') %></p>
+                  <a href="/thong-bao/read/<%= n.ma_thong_bao %>" class="block px-5 py-3.5 hover:bg-surface-container-low/50 no-underline transition-colors <%= n.da_doc ? 'opacity-70' : 'bg-primary/[0.03]' %> group">
+                    <p class="text-[14px] text-on-surface leading-snug font-semibold group-hover:text-primary transition-colors"><%= n.tieu_de %></p>
+                    <p class="text-[13px] text-on-surface-variant mt-1 line-clamp-2"><%= n.noi_dung %></p>
+                    <p class="text-[11px] text-on-surface-variant/70 mt-2 font-medium flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[14px]">schedule</span>
+                      <%= new Date(n.ngay_tao).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+                    </p>
                   </a>
                 <% }); %>
               <% } else { %>
-                <div class="px-4 py-8 text-center text-[13px] text-on-surface-variant">
-                  <span class="material-symbols-outlined text-[32px] block mb-2 opacity-40">notifications_off</span>
-                  Không có thông báo mới
+                <div class="px-5 py-10 flex flex-col items-center justify-center text-center">
+                  <div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center mb-3">
+                    <span class="material-symbols-outlined text-[32px] text-on-surface-variant/50">notifications_off</span>
+                  </div>
+                  <p class="text-[14px] font-medium text-on-surface">Không có thông báo nào</p>
+                  <p class="text-[13px] text-on-surface-variant mt-1">Khi bạn có thông báo mới, chúng sẽ xuất hiện ở đây.</p>
                 </div>
               <% } %>
+            </div>
+            <div class="px-5 py-3 border-t border-outline-variant/20 bg-surface-container-lowest text-center">
+              <a href="/thong-bao" class="text-[13px] font-semibold text-primary hover:text-primary-dark transition-colors">Xem tất cả thông báo</a>
             </div>
           </div>
         </div>
 
-        <a href="/ho-so/chinh-sua" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] text-on-surface-variant hover:text-primary hover:bg-primary/6 no-underline transition-all font-medium">
-          <span class="material-symbols-outlined text-[17px]">person</span>
-          <%= user.ho_ten %>
-        </a>
-        <% if (role === 'gia_su') { %>
-          <a href="/lich-day" class="hidden md:inline-flex badge <%= user.trong_lich ? 'badge-open' : 'badge-closed' %> no-underline items-center">
-            <span class="status-dot <%= user.trong_lich ? 'status-dot-green' : 'status-dot-yellow' %>"></span>
-            <%= user.trong_lich ? 'Trống lịch' : 'Đang bận' %>
-          </a>
-        <% } %>
-        <form method="POST" action="/auth/logout" class="inline">
-          <button type="submit" class="btn-outline" style="padding:6px 14px;font-size:13px;cursor:pointer;">Đăng xuất</button>
-        </form>
+        <div class="h-6 w-px bg-outline-variant/40 hidden md:block mx-1"></div>
+
+        <!-- User Profile Area -->
+        <div class="hidden md:flex items-center gap-4 relative group cursor-pointer" id="userProfileBtn">
+          <!-- Avatar and Name -->
+          <div class="flex items-center gap-2.5 px-2 py-1.5 rounded-full hover:bg-surface-container-highest/50 transition-colors">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-[14px] shadow-sm ring-2 ring-white">
+              <%= getInitials(user.ho_ten) %>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[14px] font-bold text-on-surface leading-tight"><%= capitalizeName(user.ho_ten) %></span>
+              <% if (role === 'gia_su') { %>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 <%= user.trong_lich ? 'bg-green-400' : 'bg-amber-400' %>"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 <%= user.trong_lich ? 'bg-green-500' : 'bg-amber-500' %>"></span>
+                  </span>
+                  <span class="text-[11px] font-medium <%= user.trong_lich ? 'text-green-600' : 'text-amber-600' %>"><%= user.trong_lich ? 'Trống lịch' : 'Đang bận' %></span>
+                </div>
+              <% } else { %>
+                <span class="text-[11px] font-medium text-on-surface-variant">Học viên</span>
+              <% } %>
+            </div>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant ml-1 group-hover:text-primary transition-colors">expand_more</span>
+          </div>
+
+          <!-- Profile Dropdown -->
+          <div id="userProfileDropdown" class="hidden absolute top-full right-0 mt-3 w-56 bg-white border border-outline-variant/30 rounded-2xl z-50 overflow-hidden" style="box-shadow: 0 10px 40px -10px rgba(0,32,92,0.15), 0 0 10px rgba(0,32,92,0.05); backdrop-filter: blur(20px);">
+            <div class="p-2">
+              <a href="/ho-so/chinh-sua" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/5 text-on-surface-variant hover:text-primary transition-colors text-[14px] font-medium no-underline">
+                <span class="material-symbols-outlined text-[20px]">person</span>
+                Hồ sơ cá nhân
+              </a>
+              <% if (role === 'gia_su') { %>
+                <form method="POST" action="/ho-so/toggle-lich" class="w-full m-0">
+                  <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/5 text-on-surface-variant hover:text-primary transition-colors text-[14px] font-medium text-left border-none bg-transparent cursor-pointer">
+                    <span class="material-symbols-outlined text-[20px]"><%= user.trong_lich ? 'event_busy' : 'event_available' %></span>
+                    Đổi trạng thái lịch
+                  </button>
+                </form>
+              <% } %>
+              <div class="h-px bg-outline-variant/30 my-1 mx-2"></div>
+              <form method="POST" action="/auth/logout" class="w-full m-0">
+                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-error/10 text-error transition-colors text-[14px] font-bold text-left border-none bg-transparent cursor-pointer">
+                  <span class="material-symbols-outlined text-[20px]">logout</span>
+                  Đăng xuất
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
       <% } else { %>
-        <button onclick="openAuthModal('login')" class="btn-outline" style="padding:7px 16px;font-size:13.5px;">Đăng nhập</button>
-        <button onclick="openAuthModal('register')" class="btn-primary" style="padding:7px 18px;font-size:13.5px;">Đăng ký</button>
+        <button onclick="openAuthModal('login')" class="text-[14px] font-bold text-on-surface hover:text-primary transition-colors px-3 py-2 border-none bg-transparent cursor-pointer">Đăng nhập</button>
+        <button onclick="openAuthModal('register')" class="btn-primary border-none cursor-pointer" style="padding:8px 20px; font-size:14px; border-radius: 999px;">Đăng ký</button>
       <% } %>
 
       <!-- Mobile menu button -->
-      <button id="mobileMenuBtn" class="md:hidden p-2 text-on-surface-variant hover:text-primary rounded-lg hover:bg-primary/8 transition-all focus:outline-none">
-        <span class="material-symbols-outlined text-[22px]" id="mobileMenuIcon">menu</span>
+      <button id="mobileMenuBtn" class="md:hidden p-2 text-on-surface-variant hover:text-primary rounded-xl hover:bg-primary/10 transition-all focus:outline-none bg-surface-container-highest/50 border-none cursor-pointer flex items-center justify-center">
+        <span class="material-symbols-outlined text-[24px]" id="mobileMenuIcon">menu</span>
       </button>
     </div>
   </div>
 
   <!-- Mobile menu -->
-  <div id="mobileMenu" class="hidden md:hidden absolute top-[68px] left-0 right-0 bg-surface-container-lowest/95 backdrop-blur-xl border-b border-outline-variant/50 shadow-xl px-4 py-3 space-y-1">
-    <a href="/" class="block px-3 py-2.5 text-on-surface-variant hover:text-primary hover:bg-primary/6 rounded-lg text-[14px] font-medium transition-all no-underline">Trang chủ</a>
-    <a href="/yeu-cau" class="block px-3 py-2.5 text-on-surface-variant hover:text-primary hover:bg-primary/6 rounded-lg text-[14px] font-medium transition-all no-underline">Yêu cầu lớp</a>
-    <% if (role === 'gia_su') { %>
-      <a href="/lop-da-ung-tuyen" class="block px-3 py-2.5 text-on-surface-variant hover:text-primary hover:bg-primary/6 rounded-lg text-[14px] font-medium transition-all no-underline">Đã ứng tuyển</a>
-      <a href="/lop-hoc" class="block px-3 py-2.5 text-on-surface-variant hover:text-primary hover:bg-primary/6 rounded-lg text-[14px] font-medium transition-all no-underline">Lớp của tôi</a>
-      <a href="/lich-day" class="block px-3 py-2.5 text-on-surface-variant hover:text-primary hover:bg-primary/6 rounded-lg text-[14px] font-medium transition-all no-underline">Lịch dạy</a>
-    <% } else if (role === 'hoc_vien') { %>
-      <a href="/dang-tin" class="block px-3 py-2.5 text-on-surface-variant hover:text-primary hover:bg-primary/6 rounded-lg text-[14px] font-medium transition-all no-underline">Đăng tin</a>
-      <a href="/yeu-cau-cua-toi" class="block px-3 py-2.5 text-on-surface-variant hover:text-primary hover:bg-primary/6 rounded-lg text-[14px] font-medium transition-all no-underline">Yêu cầu của tôi</a>
-      <a href="/lop-hoc" class="block px-3 py-2.5 text-on-surface-variant hover:text-primary hover:bg-primary/6 rounded-lg text-[14px] font-medium transition-all no-underline">Lớp học</a>
-    <% } %>
-    <% if (user) { %>
-      <a href="/ho-so/chinh-sua" class="block px-3 py-2.5 text-on-surface-variant hover:text-primary hover:bg-primary/6 rounded-lg text-[14px] font-medium transition-all no-underline">Hồ sơ: <%= user.ho_ten %></a>
-    <% } %>
-    <% if (isAdmin) { %>
-      <a href="/admin" class="block px-3 py-2.5 text-error hover:bg-error/6 rounded-lg text-[14px] font-semibold transition-all no-underline">Quản trị</a>
-    <% } %>
+  <div id="mobileMenu" class="hidden md:hidden absolute top-[76px] left-0 right-0 bg-white/95 backdrop-blur-2xl border-b border-outline-variant/30 shadow-2xl overflow-hidden transition-all origin-top">
+    <div class="px-5 py-4 space-y-1.5 max-h-[calc(100vh-76px)] overflow-y-auto">
+      <% if (user) { %>
+        <div class="flex items-center gap-3 p-3 mb-2 bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-sm">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-[18px] shadow-inner">
+            <%= getInitials(user.ho_ten) %>
+          </div>
+          <div class="flex flex-col flex-1">
+            <span class="text-[15px] font-bold text-on-surface"><%= capitalizeName(user.ho_ten) %></span>
+            <% if (role === 'gia_su') { %>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 <%= user.trong_lich ? 'bg-green-400' : 'bg-amber-400' %>"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 <%= user.trong_lich ? 'bg-green-500' : 'bg-amber-500' %>"></span>
+                </span>
+                <span class="text-[12px] font-medium <%= user.trong_lich ? 'text-green-600' : 'text-amber-600' %>"><%= user.trong_lich ? 'Trống lịch' : 'Đang bận' %></span>
+              </div>
+            <% } else { %>
+              <span class="text-[12px] font-medium text-on-surface-variant">Học viên</span>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+
+      <a href="/" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl text-[15px] font-semibold transition-all no-underline">
+        <span class="material-symbols-outlined text-[20px]">home</span> Trang chủ
+      </a>
+      <a href="/yeu-cau" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl text-[15px] font-semibold transition-all no-underline">
+        <span class="material-symbols-outlined text-[20px]">search</span> Yêu cầu lớp
+      </a>
+      
+      <% if (role === 'gia_su') { %>
+        <a href="/lop-da-ung-tuyen" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl text-[15px] font-semibold transition-all no-underline">
+          <span class="material-symbols-outlined text-[20px]">history_edu</span> Đã ứng tuyển
+        </a>
+        <a href="/lop-hoc" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl text-[15px] font-semibold transition-all no-underline">
+          <span class="material-symbols-outlined text-[20px]">class</span> Lớp của tôi
+        </a>
+        <a href="/lich-day" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl text-[15px] font-semibold transition-all no-underline">
+          <span class="material-symbols-outlined text-[20px]">calendar_month</span> Lịch dạy
+        </a>
+      <% } else if (role === 'hoc_vien') { %>
+        <a href="/dang-tin" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl text-[15px] font-semibold transition-all no-underline">
+          <span class="material-symbols-outlined text-[20px]">post_add</span> Đăng tin
+        </a>
+        <a href="/yeu-cau-cua-toi" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl text-[15px] font-semibold transition-all no-underline">
+          <span class="material-symbols-outlined text-[20px]">list_alt</span> Yêu cầu của tôi
+        </a>
+        <a href="/lop-hoc" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl text-[15px] font-semibold transition-all no-underline">
+          <span class="material-symbols-outlined text-[20px]">class</span> Lớp học
+        </a>
+      <% } %>
+      
+      <% if (isAdmin) { %>
+        <a href="/admin" class="flex items-center gap-3 px-4 py-3 text-error hover:bg-error/10 rounded-xl text-[15px] font-bold transition-all no-underline">
+          <span class="material-symbols-outlined text-[20px]">admin_panel_settings</span> Quản trị
+        </a>
+      <% } %>
+
+      <% if (user) { %>
+        <div class="h-px bg-outline-variant/30 my-2 mx-2"></div>
+        <a href="/ho-so/chinh-sua" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl text-[15px] font-semibold transition-all no-underline">
+          <span class="material-symbols-outlined text-[20px]">manage_accounts</span> Chỉnh sửa hồ sơ
+        </a>
+        <form method="POST" action="/auth/logout" class="block w-full m-0">
+          <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-error hover:bg-error/10 rounded-xl text-[15px] font-bold transition-all text-left border-none bg-transparent cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">logout</span> Đăng xuất
+          </button>
+        </form>
+      <% } %>
+    </div>
   </div>
 </nav>
+
+<style>
+  /* Extra styles for navbar specifically */
+  .nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: #0040a1;
+    border-radius: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+  .nav-item:hover::after, .nav-link-active::after {
+    width: 20px;
+    opacity: 1;
+  }
+  .nav-link-active {
+    color: #0040a1 !important;
+    background: transparent !important;
+    font-weight: 700 !important;
+  }
+</style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Navbar scroll effect
     const nav = document.querySelector('.glass-nav');
     window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 20);
+      if (window.scrollY > 20) {
+        nav.classList.add('bg-white/95', 'backdrop-blur-xl', 'shadow-lg');
+        nav.classList.remove('bg-transparent');
+      } else {
+        nav.classList.remove('bg-white/95', 'backdrop-blur-xl', 'shadow-lg');
+        nav.classList.add('bg-transparent');
+      }
     }, { passive: true });
 
     // Active nav link
@@ -131,22 +278,47 @@
       }
     });
 
-    // Notification bell
-    const bell = document.getElementById('notifBell');
-    const dropdown = document.getElementById('notifDropdown');
-    if (bell && dropdown) {
-      bell.addEventListener('click', e => { e.stopPropagation(); dropdown.classList.toggle('hidden'); });
-      document.addEventListener('click', e => {
-        if (!dropdown.contains(e.target) && e.target !== bell) dropdown.classList.add('hidden');
+    // Dropdown Toggles Helper
+    const toggleDropdown = (trigger, dropdown) => {
+      if (!trigger || !dropdown) return;
+      
+      trigger.addEventListener('click', e => { 
+        e.preventDefault();
+        e.stopPropagation(); 
+        
+        // Close other dropdowns
+        document.querySelectorAll('[id$="Dropdown"]').forEach(d => {
+          if (d !== dropdown && !d.classList.contains('hidden')) {
+            d.classList.add('hidden');
+          }
+        });
+        
+        dropdown.classList.toggle('hidden'); 
       });
-    }
+      
+      document.addEventListener('click', e => {
+        if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      });
+    };
+
+    // Notification bell
+    toggleDropdown(document.getElementById('notifBell'), document.getElementById('notifDropdown'));
+    
+    // User Profile Dropdown
+    toggleDropdown(document.getElementById('userProfileBtn'), document.getElementById('userProfileDropdown'));
 
     // Mark all read
     document.getElementById('markAllRead')?.addEventListener('click', async e => {
       e.preventDefault(); e.stopPropagation();
-      const res = await fetch('/thong-bao/read-all', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) window.location.reload();
+      try {
+        const res = await fetch('/thong-bao/read-all', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) window.location.reload();
+      } catch (err) {
+        console.error("Error marking all read", err);
+      }
     });
 
     // Mobile menu
@@ -156,9 +328,15 @@
     if (mobileBtn && mobileMenu) {
       mobileBtn.addEventListener('click', () => {
         const isOpen = !mobileMenu.classList.contains('hidden');
-        mobileMenu.classList.toggle('hidden');
-        mobileIcon.textContent = isOpen ? 'menu' : 'close';
+        if (isOpen) {
+          mobileMenu.classList.add('hidden');
+          mobileIcon.textContent = 'menu';
+        } else {
+          mobileMenu.classList.remove('hidden');
+          mobileIcon.textContent = 'close';
+        }
       });
     }
   });
 </script>
+
