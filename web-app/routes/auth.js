@@ -73,15 +73,20 @@ router.post('/login', async (req, res) => {
     const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({ email, password });
     if (authErr) throw authErr;
 
-    const { data: qtv } = await supabase.from('quan_tri_vien').select('*').eq('auth_id', authData.user.id).single();
+    const { data: qtv } = await supabase.from('quan_tri_vien').select('*').eq('auth_id', authData.user.id).maybeSingle();
 
     if (qtv) {
       req.session.user = qtv;
       req.session.role = 'quan_tri_vien';
       req.session.isAdmin = true;
     } else {
-      const { data: hv } = await supabase.from('hoc_vien').select('*').eq('auth_id', authData.user.id).single();
-      const { data: gs } = await supabase.from('gia_su').select('*').eq('auth_id', authData.user.id).single();
+      const { data: hv } = await supabase.from('hoc_vien').select('*').eq('auth_id', authData.user.id).maybeSingle();
+      const { data: gs } = await supabase.from('gia_su').select('*').eq('auth_id', authData.user.id).maybeSingle();
+
+      if (!hv && !gs) {
+        throw new Error('Tài khoản chưa được liên kết với hồ sơ học viên hoặc gia sư.');
+      }
+
       req.session.user = hv || gs;
       req.session.role = hv ? 'hoc_vien' : 'gia_su';
       req.session.isAdmin = false;
@@ -99,9 +104,8 @@ router.post('/login', async (req, res) => {
 });
 
 // Đăng xuất
-router.get('/logout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/');
+router.post('/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/'));
 });
 
 // Quên mật khẩu

@@ -74,7 +74,16 @@
                     <% } %>
                   </div>
                   <% if (ut.trang_thai === 'pending' && yc.trang_thai === 'open') { %>
-                    <button type="button" onclick="openDuyetModal('<%= yc.ma_yeu_cau %>', '<%= ut.ma_gia_su %>', '<%= ut.gia_su ? ut.gia_su.ho_ten.replace(/'/g, `\\'`) : '' %>', <%= yc.so_buoi_tuan || 2 %>, '<%= JSON.stringify(ycLich).replace(/'/g, `\\u0027`) %>')" class="btn-secondary ml-3" style="padding:6px 16px;font-size:13px;">Chọn gia sư này</button>
+                    <button type="button" 
+                            class="btn-secondary ml-3 btn-mo-duyet" 
+                            data-ma-yeu-cau="<%= yc.ma_yeu_cau %>"
+                            data-ma-gia-su="<%= ut.ma_gia_su %>"
+                            data-ho-ten="<%= ut.gia_su ? ut.gia_su.ho_ten : '' %>"
+                            data-so-buoi-tuan="<%= yc.so_buoi_tuan || 2 %>"
+                            data-yc-lich="<%= JSON.stringify(ycLich).replace(/"/g, '&quot;') %>"
+                            style="padding:6px 16px;font-size:13px;">
+                      Chọn gia sư này
+                    </button>
                   <% } %>
                 </div>
               <% }); %>
@@ -132,6 +141,17 @@
   </div>
 </div>
 <script>
+  document.querySelectorAll('.btn-mo-duyet').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const maYc = this.getAttribute('data-ma-yeu-cau');
+      const maGs = this.getAttribute('data-ma-gia-su');
+      const tenGs = this.getAttribute('data-ho-ten');
+      const soBuoiTuan = this.getAttribute('data-so-buoi-tuan');
+      const lichJson = this.getAttribute('data-yc-lich');
+      openDuyetModal(maYc, maGs, tenGs, soBuoiTuan, lichJson);
+    });
+  });
+
   function openDuyetModal(maYc, maGs, tenGs, soBuoiTuan, lichJson) {
     document.getElementById('duyetMaYeuCau').value = maYc;
     document.getElementById('duyetMaGiaSu').value = maGs;

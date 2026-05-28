@@ -51,7 +51,9 @@
           </p>
 
           <% if (role === 'gia_su') { %>
-            <button onclick="openUngTuyenModal('<%= yc.ma_yeu_cau %>', '<%= yc.tieu_de.replace(/'/g, "\\'") %>')" class="btn-primary w-full mt-3 text-center block">
+            <button class="btn-primary w-full mt-3 text-center block btn-ung-tuyen"
+                    data-ma-yeu-cau="<%= yc.ma_yeu_cau %>"
+                    data-tieu-de="<%= yc.tieu_de %>">
               Ứng tuyển ngay
             </button>
           <% } else if (!user) { %>
@@ -226,6 +228,14 @@
     submitBtn.disabled = false;
     submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
   }
+
+  document.querySelectorAll('.btn-ung-tuyen').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const maYeuCau = this.getAttribute('data-ma-yeu-cau');
+      const tieuDe = this.getAttribute('data-tieu-de');
+      openUngTuyenModal(maYeuCau, tieuDe);
+    });
+  });
 
   function openUngTuyenModal(maYeuCau, title) {
     document.getElementById('utMaYeuCau').value = maYeuCau;

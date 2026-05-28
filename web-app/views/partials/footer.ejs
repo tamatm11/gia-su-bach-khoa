@@ -1,2 +1,22 @@
+<script>
+  // Chống double-submit: vô hiệu hoá nút sau khi nhấn 1 lần
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    if (form.dataset.noBlock === '1') return;
+    var buttons = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+    buttons.forEach(function (btn) {
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.dataset.originalText = btn.textContent;
+      if (btn.tagName === 'BUTTON') btn.textContent = 'Đang xử lý...';
+      // Mở lại sau 8s phòng trường hợp request fail không reload (UX an toàn)
+      setTimeout(function () {
+        btn.disabled = false;
+        if (btn.dataset.originalText) btn.textContent = btn.dataset.originalText;
+      }, 8000);
+    });
+  }, true);
+</script>
 </body>
 </html>

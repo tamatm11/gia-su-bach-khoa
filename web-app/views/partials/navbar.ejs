@@ -31,6 +31,41 @@
     <!-- User Menu -->
     <div class="flex items-center gap-3">
       <% if (user) { %>
+        <!-- Notifications Bell -->
+        <div class="relative notification-container">
+          <button id="notifBell" class="relative p-2 text-on-surface-variant hover:text-primary rounded-full hover:bg-surface-container-low transition-all focus:outline-none flex items-center justify-center">
+            <span class="material-symbols-outlined text-[24px]">notifications</span>
+            <% if (unreadCount > 0) { %>
+              <span class="absolute top-0 right-0 min-w-5 h-5 px-1 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse" style="line-height: 1;">
+                <%= unreadCount %>
+              </span>
+            <% } %>
+          </button>
+          
+          <!-- Dropdown -->
+          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl z-50 overflow-hidden">
+            <div class="px-4 py-3 border-b border-outline-variant flex items-center justify-between bg-surface-container-low">
+              <span class="text-label-md font-semibold text-on-surface">Thông báo</span>
+              <% if (unreadCount > 0) { %>
+                <button id="markAllRead" class="text-[11px] text-primary hover:underline font-semibold focus:outline-none bg-transparent border-0 cursor-pointer">Đọc tất cả</button>
+              <% } %>
+            </div>
+            <div class="max-h-[300px] overflow-y-auto divide-y divide-outline-variant" id="notifList">
+              <% if (notifications && notifications.length > 0) { %>
+                <% notifications.forEach(function(n) { %>
+                  <a href="/thong-bao/read/<%= n.ma_thong_bao %>" class="block px-4 py-3 hover:bg-surface-container-low no-underline text-left transition-colors <%= n.da_doc ? 'opacity-70' : 'bg-primary-container/10 font-semibold' %>">
+                    <p class="text-body-sm text-on-surface leading-snug"><%= n.tieu_de %></p>
+                    <p class="text-label-sm text-on-surface-variant mt-1"><%= n.noi_dung %></p>
+                    <p class="text-[10px] text-on-surface-variant mt-1.5"><%= new Date(n.ngay_tao).toLocaleString('vi-VN') %></p>
+                  </a>
+                <% }); %>
+              <% } else { %>
+                <div class="px-4 py-6 text-center text-label-md text-on-surface-variant">Không có thông báo mới</div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
         <a href="/ho-so/chinh-sua" class="text-label-md text-on-surface-variant hidden md:inline flex items-center gap-1 hover:text-primary no-underline transition-colors">
           <span class="material-symbols-outlined text-[18px]">person</span>
           <%= user.ho_ten %>
@@ -41,7 +76,9 @@
             <%= user.trong_lich ? 'Đang trống lịch' : 'Đang bận' %>
           </a>
         <% } %>
-        <a href="/auth/logout" class="btn-outline text-decoration-none" style="padding:6px 16px;font-size:13px;">Đăng xuất</a>
+        <form method="POST" action="/auth/logout" class="inline">
+          <button type="submit" class="btn-outline" style="padding:6px 16px;font-size:13px;cursor:pointer;">Đăng xuất</button>
+        </form>
       <% } else { %>
         <button onclick="openAuthModal('login')" class="btn-outline text-decoration-none" style="padding:7px 18px;font-size:14px;">Đăng nhập</button>
         <button onclick="openAuthModal('register')" class="btn-primary text-decoration-none" style="padding:8px 20px;font-size:14px;">Đăng ký</button>
@@ -49,3 +86,41 @@
     </div>
   </div>
 </nav>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const bell = document.getElementById('notifBell');
+    const dropdown = document.getElementById('notifDropdown');
+    const markAllRead = document.getElementById('markAllRead');
+    
+    if (bell && dropdown) {
+      bell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('hidden');
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && e.target !== bell) {
+          dropdown.classList.add('hidden');
+        }
+      });
+    }
+
+    if (markAllRead) {
+      markAllRead.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          const res = await fetch('/thong-bao/read-all', { method: 'POST' });
+          const data = await res.json();
+          if (data.success) {
+            window.location.reload();
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      });
+    }
+  });
+</script>
+

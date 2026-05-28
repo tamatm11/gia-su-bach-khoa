@@ -23,13 +23,57 @@ app.use(session({
   cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24h
 }));
 
-// Middleware: expose user & flash to all views
-app.use((req, res, next) => {
+// Middleware: expose user, flash & notifications to all views
+app.use(async (req, res, next) => {
   res.locals.user = req.session.user || null;
   res.locals.role = req.session.role || null;
   res.locals.isAdmin = req.session.isAdmin || false;
   res.locals.error = req.session.error || null;
   res.locals.success = req.session.success || null;
+
+  res.locals.notifications = [];
+  res.locals.unreadCount = 0;
+
+  if (req.session.user) {
+    try {
+      const isHV = req.session.role === 'hoc_vien';
+      const isGS = req.session.role === 'gia_su';
+
+      let query = null;
+      if (isHV) {
+        query = supabaseAdmin
+          .from('thong_bao')
+          .select('*')
+          .eq('ma_hoc_vien', req.session.user.ma_hoc_vien);
+      } else if (isGS) {
+        query = supabaseAdmin
+          .from('thong_bao')
+          .select('*')
+          .eq('ma_gia_su', req.session.user.ma_gia_su);
+      }
+
+      if (query) {
+        const { data: notifs } = await query
+          .order('ngay_tao', { ascending: false })
+          .limit(5);
+
+        // Đếm riêng các thông báo chưa đọc (head:true không trả data, rẻ hơn full count)
+        let unreadQuery = supabaseAdmin
+          .from('thong_bao')
+          .select('*', { count: 'exact', head: true })
+          .eq('da_doc', false);
+        if (isHV) unreadQuery = unreadQuery.eq('ma_hoc_vien', req.session.user.ma_hoc_vien);
+        else unreadQuery = unreadQuery.eq('ma_gia_su', req.session.user.ma_gia_su);
+        const { count } = await unreadQuery;
+
+        res.locals.notifications = notifs || [];
+        res.locals.unreadCount = count || 0;
+      }
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+    }
+  }
+
   delete req.session.error;
   delete req.session.success;
   next();
@@ -44,23 +88,26 @@ app.use((req, res, next) => {
 app.get('/', async (req, res) => {
   try {
     // Lấy danh sách yêu cầu đang mở
-    const { data: yeuCauList } = await supabase
+    const { data: yeuCauList, error: errYC } = await supabase
       .from('yeu_cau_lop')
       .select('*, hoc_vien(ho_ten, khoi_hien_tai)')
       .eq('trang_thai', 'open')
       .order('ngay_yeu_cau', { ascending: false })
       .limit(6);
+    if (errYC) throw errYC;
 
     // Lấy danh sách gia sư nổi bật
-    const { data: giaSuList } = await supabase
+    const { data: giaSuList, error: errGS } = await supabase
       .from('gia_su')
       .select('*')
       .eq('trong_lich', true)
       .limit(4);
+    if (errGS) throw errGS;
 
     res.render('index', { yeuCauList: yeuCauList || [], giaSuList: giaSuList || [] });
   } catch (err) {
     console.error('Trang chủ:', err.message);
+    res.locals.error = 'Không tải được dữ liệu trang chủ. Vui lòng thử lại sau.';
     res.render('index', { yeuCauList: [], giaSuList: [] });
   }
 });
@@ -176,7 +223,7 @@ app.post('/dang-tin', async (req, res) => {
       finalMaMon = ma_mon_moi;
     }
 
-    await supabaseAdmin.rpc('sp_tao_yeu_cau_lop', {
+    const { error: errRpc } = await supabaseAdmin.rpc('sp_tao_yeu_cau_lop', {
       p_ma_yeu_cau: ma_yeu_cau,
       p_ma_hoc_vien: req.session.user.ma_hoc_vien,
       p_tieu_de: tieu_de,
@@ -187,6 +234,7 @@ app.post('/dang-tin', async (req, res) => {
       p_so_buoi_tuan: parsedSoBuoi,
       p_thoi_gian_mong_muon: thoi_gian_mong_muon || null
     });
+    if (errRpc) throw errRpc;
 
     // Thêm môn học
     if (finalMaMon) {
@@ -303,13 +351,14 @@ app.post('/ung-tuyen', async (req, res) => {
   const ma_ung_tuyen = 'UT' + Date.now().toString(36).toUpperCase();
 
   try {
-    await supabaseAdmin.rpc('sp_ung_tuyen', {
+    const { error: errUT } = await supabaseAdmin.rpc('sp_ung_tuyen', {
       p_ma_ung_tuyen: ma_ung_tuyen,
       p_ma_yeu_cau: ma_yeu_cau,
       p_ma_gia_su: req.session.user.ma_gia_su,
       p_thu_nhap_mong_muon: thu_nhap_mong_muon ? parseInt(thu_nhap_mong_muon) : null,
       p_loi_nhan: loi_nhan || null
     });
+    if (errUT) throw errUT;
     req.session.success = 'Ứng tuyển thành công! Học viên sẽ xem xét hồ sơ của bạn.';
   } catch (err) {
     req.session.error = 'Lỗi: ' + err.message;
@@ -372,10 +421,15 @@ app.post('/toggle-trong-lich', async (req, res) => {
   if (!req.session.user || req.session.role !== 'gia_su') return res.redirect('/');
 
   const newState = !req.session.user.trong_lich;
-  await supabaseAdmin.rpc('sp_toggle_trong_lich', {
+  const { error: errToggle } = await supabaseAdmin.rpc('sp_toggle_trong_lich', {
     p_ma_gia_su: req.session.user.ma_gia_su,
     p_trong_lich: newState
   });
+
+  if (errToggle) {
+    req.session.error = 'Không thể cập nhật trạng thái: ' + errToggle.message;
+    return res.redirect('/lich-day');
+  }
 
   req.session.user.trong_lich = newState;
   req.session.success = newState ? 'Bạn đã bật trạng thái trống lịch.' : 'Bạn đã tắt trạng thái trống lịch.';
@@ -390,12 +444,13 @@ app.post('/danh-gia', async (req, res) => {
   const { ma_dang_ky, diem_sao, nhan_xet } = req.body;
   const ma_danh_gia = 'DG' + Date.now().toString(36).toUpperCase();
   try {
-    await supabaseAdmin.rpc('sp_danh_gia', {
+    const { error: errDG } = await supabaseAdmin.rpc('sp_danh_gia', {
       p_ma_danh_gia: ma_danh_gia,
       p_ma_dang_ky: ma_dang_ky,
       p_diem_sao: parseInt(diem_sao),
       p_nhan_xet: nhan_xet || null
     });
+    if (errDG) throw errDG;
     req.session.success = 'Đánh giá thành công!';
   } catch (err) {
     req.session.error = 'Lỗi: ' + err.message;
@@ -493,6 +548,63 @@ app.get('/api/ung-tuyen-count/:ma_yeu_cau', async (req, res) => {
     .eq('ma_yeu_cau', req.params.ma_yeu_cau);
 
   res.json({ count });
+});
+
+// =========================================================================
+// ROUTES - THÔNG BÁO
+// =========================================================================
+
+// Đọc thông báo và chuyển hướng
+app.get('/thong-bao/read/:id', async (req, res) => {
+  if (!req.session.user) return res.redirect('/');
+  
+  const { id } = req.params;
+  
+  try {
+    const { data: notif } = await supabaseAdmin
+      .from('thong_bao')
+      .update({ da_doc: true })
+      .eq('ma_thong_bao', id)
+      .select()
+      .single();
+      
+    if (notif) {
+      if (notif.ma_lop) {
+        return res.redirect('/lop-hoc');
+      } else if (notif.ma_yeu_cau) {
+        if (req.session.role === 'hoc_vien') {
+          return res.redirect('/yeu-cau-cua-toi');
+        } else {
+          return res.redirect('/lop-da-ung-tuyen');
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error handling notification read:', err);
+  }
+  
+  res.redirect('/');
+});
+
+// Đọc tất cả thông báo
+app.post('/thong-bao/read-all', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'Unauthorized' });
+  
+  try {
+    const isHV = req.session.role === 'hoc_vien';
+    const userIdField = isHV ? 'ma_hoc_vien' : 'ma_gia_su';
+    const userIdVal = isHV ? req.session.user.ma_hoc_vien : req.session.user.ma_gia_su;
+    
+    await supabaseAdmin
+      .from('thong_bao')
+      .update({ da_doc: true })
+      .eq(userIdField, userIdVal);
+      
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error marking all notifications as read:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // =========================================================================

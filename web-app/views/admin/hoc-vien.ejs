@@ -72,9 +72,11 @@
         <a href="/" class="sidebar-link text-sm">
           <span class="material-symbols-outlined text-[18px]">arrow_back</span> Về trang chủ
         </a>
-        <a href="/auth/logout" class="sidebar-link text-sm text-[#ba1a1a] mt-1 hover:bg-[#ffdad6]">
-          <span class="material-symbols-outlined text-[18px]">logout</span> Đăng xuất
-        </a>
+        <form method="POST" action="/auth/logout" class="m-0">
+          <button type="submit" class="sidebar-link text-sm text-[#ba1a1a] mt-1 hover:bg-[#ffdad6] w-full text-left bg-transparent border-0 cursor-pointer">
+            <span class="material-symbols-outlined text-[18px]">logout</span> Đăng xuất
+          </button>
+        </form>
       </div>
     </aside>
 

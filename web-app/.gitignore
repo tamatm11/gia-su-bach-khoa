@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.local
+*.log
+npm-debug.log*
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# File scratch / debug
+test-query.js
+test-*.js
+scratch-*.js

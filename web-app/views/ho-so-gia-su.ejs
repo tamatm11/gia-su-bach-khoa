@@ -10,7 +10,7 @@
   <div class="glass-panel rounded-2xl p-6 md:p-8 mb-6">
     <div class="flex flex-col md:flex-row items-start gap-6">
       <!-- Avatar -->
-      <div class="w-20 h-20 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-3xl font-bold shrink-0">
+      <div class="w-20 h-20 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-3xl font-bold shrink-0" role="img" aria-label="Ảnh đại diện: <%= gs.ho_ten %>">
         <%= gs.ho_ten.charAt(0) %>
       </div>
       <div class="flex-1">
@@ -165,7 +165,13 @@
           <h4 class="text-title-md font-bold text-on-surface">Bạn muốn duyệt gia sư này?</h4>
           <p class="text-label-sm text-on-surface-variant">Hệ thống sẽ tự động tạo lớp học và lưu lịch giảng dạy.</p>
         </div>
-        <button type="button" onclick="openDuyetModal('<%= ma_yeu_cau %>', '<%= gs.ma_gia_su %>', '<%= gs.ho_ten.replace(/'/g, `\\'`) %>', <%= yc ? yc.so_buoi_tuan : 2 %>)" class="btn-primary h-[48px] shrink-0" style="padding: 0 24px; font-size: 16px;">
+        <button type="button" 
+                class="btn-primary h-[48px] shrink-0 btn-mo-duyet" 
+                data-ma-yeu-cau="<%= ma_yeu_cau %>"
+                data-ma-gia-su="<%= gs.ma_gia_su %>"
+                data-ho-ten="<%= gs.ho_ten %>"
+                data-so-buoi-tuan="<%= yc ? yc.so_buoi_tuan : 2 %>"
+                style="padding: 0 24px; font-size: 16px;">
           <span class="material-symbols-outlined align-middle mr-1 text-[20px]">check_circle</span>
           Chọn gia sư & Tạo lớp
         </button>
@@ -209,6 +215,16 @@
       </div>
     </div>
     <script>
+      document.querySelectorAll('.btn-mo-duyet').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const maYc = this.getAttribute('data-ma-yeu-cau');
+          const maGs = this.getAttribute('data-ma-gia-su');
+          const tenGs = this.getAttribute('data-ho-ten');
+          const soBuoiTuan = this.getAttribute('data-so-buoi-tuan');
+          openDuyetModal(maYc, maGs, tenGs, soBuoiTuan);
+        });
+      });
+
       function openDuyetModal(maYc, maGs, tenGs, soBuoiTuan) {
         document.getElementById('duyetMaYeuCau').value = maYc;
         document.getElementById('duyetMaGiaSu').value = maGs;
