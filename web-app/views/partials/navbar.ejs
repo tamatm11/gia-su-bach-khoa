@@ -94,9 +94,9 @@
         <div class="h-6 w-px bg-outline-variant/40 hidden md:block mx-1"></div>
 
         <!-- User Profile Area -->
-        <div class="hidden md:flex items-center gap-4 relative group cursor-pointer" id="userProfileBtn">
+        <div class="hidden md:flex items-center gap-4 relative group">
           <!-- Avatar and Name -->
-          <div class="flex items-center gap-2.5 px-2 py-1.5 rounded-full hover:bg-surface-container-highest/50 transition-colors">
+          <div id="userProfileBtn" class="flex items-center gap-2.5 px-2 py-1.5 rounded-full hover:bg-surface-container-highest/50 transition-colors cursor-pointer">
             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-[14px] shadow-sm ring-2 ring-white">
               <%= getInitials(user.ho_ten) %>
             </div>
@@ -125,12 +125,10 @@
                 Hồ sơ cá nhân
               </a>
               <% if (role === 'gia_su') { %>
-                <form method="POST" action="/ho-so/toggle-lich" class="w-full m-0">
-                  <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/5 text-on-surface-variant hover:text-primary transition-colors text-[14px] font-medium text-left border-none bg-transparent cursor-pointer">
-                    <span class="material-symbols-outlined text-[20px]"><%= user.trong_lich ? 'event_busy' : 'event_available' %></span>
-                    Đổi trạng thái lịch
-                  </button>
-                </form>
+                <a href="/lich-day" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/5 text-on-surface-variant hover:text-primary transition-colors text-[14px] font-medium no-underline">
+                  <span class="material-symbols-outlined text-[20px]"><%= user.trong_lich ? 'event_busy' : 'event_available' %></span>
+                  Cập nhật trạng thái lịch
+                </a>
               <% } %>
               <div class="h-px bg-outline-variant/30 my-1 mx-2"></div>
               <form method="POST" action="/auth/logout" class="w-full m-0">
@@ -339,4 +337,3 @@
     }
   });
 </script>
-
