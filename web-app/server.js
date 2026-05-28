@@ -275,19 +275,24 @@ app.get('/yeu-cau-cua-toi', async (req, res) => {
     .eq('ma_hoc_vien', req.session.user.ma_hoc_vien)
     .order('ngay_yeu_cau', { ascending: false });
 
-  // Lấy danh sách ứng tuyển cho từng yêu cầu
-  const { data: utList } = await supabaseAdmin
-    .from('ung_tuyen')
-    .select('*, gia_su(ho_ten, trinh_do, gioi_thieu)')
-    .in('ma_yeu_cau', (list || []).map(y => y.ma_yeu_cau));
+  const [{ data: utList }, { data: ycLichList }, { data: lichSuThue }] = await Promise.all([
+    supabaseAdmin
+      .from('ung_tuyen')
+      .select('*, gia_su(ho_ten, trinh_do, gioi_thieu)')
+      .in('ma_yeu_cau', (list || []).map(y => y.ma_yeu_cau)),
+    supabaseAdmin
+      .from('yeu_cau_lich_hoc')
+      .select('*')
+      .in('ma_yeu_cau', (list || []).map(y => y.ma_yeu_cau)),
+    supabaseAdmin
+      .from('lop_hoc')
+      .select('*, gia_su(ho_ten), lop_hoc_mon(mon_hoc(ten_mon))')
+      .eq('ma_hoc_vien', req.session.user.ma_hoc_vien)
+      .in('trang_thai', ['da_hoan_thanh', 'da_huy'])
+      .order('ngay_bat_dau', { ascending: false })
+  ]);
 
-  // Lấy lịch học mong muốn cụ thể
-  const { data: ycLichList } = await supabaseAdmin
-    .from('yeu_cau_lich_hoc')
-    .select('*')
-    .in('ma_yeu_cau', (list || []).map(y => y.ma_yeu_cau));
-
-  res.render('yeu-cau-cua-toi', { list: list || [], utList: utList || [], ycLichList: ycLichList || [] });
+  res.render('yeu-cau-cua-toi', { list: list || [], utList: utList || [], ycLichList: ycLichList || [], lichSuThue: lichSuThue || [] });
 });
 
 // Học viên chọn gia sư và tự động tạo lớp học
@@ -407,13 +412,21 @@ app.use('/lop-hoc', require('./routes/lop-hoc'));
 app.get('/lich-day', async (req, res) => {
   if (!req.session.user || req.session.role !== 'gia_su') return res.redirect('/');
 
-  const { data: lich } = await supabaseAdmin
-    .from('vw_lich_trinh_gia_su')
-    .select('*')
-    .eq('ma_gia_su', req.session.user.ma_gia_su)
-    .order('thu_trong_tuan');
+  const [{ data: lich }, { data: lichSu }] = await Promise.all([
+    supabaseAdmin
+      .from('vw_lich_trinh_gia_su')
+      .select('*')
+      .eq('ma_gia_su', req.session.user.ma_gia_su)
+      .order('thu_trong_tuan'),
+    supabaseAdmin
+      .from('lop_hoc')
+      .select('*, hoc_vien(ho_ten), lop_hoc_mon(mon_hoc(ten_mon))')
+      .eq('ma_gia_su', req.session.user.ma_gia_su)
+      .in('trang_thai', ['da_hoan_thanh', 'da_huy'])
+      .order('ngay_bat_dau', { ascending: false })
+  ]);
 
-  res.render('lich-day', { lich: lich || [] });
+  res.render('lich-day', { lich: lich || [], lichSu: lichSu || [] });
 });
 
 // Toggle trạng thái trống lịch

@@ -1,23 +1,22 @@
 -- ==============================================================================
--- hệ thống quản lý gia sư - học viên (giasubachkhoa)
+-- hệ thống quản lý gia sư - học viên (GiaSuBachKhoa)
 -- ==============================================================================
 
 use master;
 go
 
-if db_id('giasubachkhoa') is not null
+if db_id('GiaSuBachKhoa') is not null
 begin
-    alter database giasubachkhoa set single_user with rollback immediate;
-    drop database giasubachkhoa;
+    alter database GiaSuBachKhoa set single_user with rollback immediate;
+    drop database GiaSuBachKhoa;
 end
 go
 
-create database giasubachkhoa;
+create database GiaSuBachKhoa;
 go
 
-use giasubachkhoa;
+use GiaSuBachKhoa;
 go
-
 set ansi_nulls on;
 set quoted_identifier on;
 go
@@ -43,7 +42,6 @@ create table hoc_vien (
     constraint ck_hoc_vien_gioi_tinh check (gioi_tinh is null or gioi_tinh in (N'Nam', N'Nữ', N'Nu', N'Khác', N'Khac'))
 );
 
--- bảng lưu thông tin gia sư
 create table gia_su (
     ma_gia_su       varchar(20)      primary key,
     ho_ten          nvarchar(100)    not null,
@@ -62,7 +60,6 @@ create table gia_su (
     constraint ck_gia_su_gioi_tinh check (gioi_tinh is null or gioi_tinh in (N'Nam', N'Nữ', N'Nu', N'Khác', N'Khac'))
 );
 
--- bảng lưu thông tin môn học
 create table mon_hoc (
     ma_mon          varchar(20)   primary key,
     ten_mon         nvarchar(100) not null,
@@ -80,11 +77,7 @@ create table gia_su_mon_hoc (
     primary key (ma_gia_su, ma_mon)
 );
 
--- ==============================================================================
 -- phần 2: quản lý yêu cầu tìm gia sư và ứng tuyển
--- ==============================================================================
-
--- bảng lưu các yêu cầu tìm gia sư từ học viên
 create table yeu_cau_lop (
     ma_yeu_cau              varchar(20)   primary key,
     ma_hoc_vien             varchar(20)   not null references hoc_vien(ma_hoc_vien),
@@ -112,12 +105,11 @@ create table yeu_cau_lop (
 create table yeu_cau_mon (
     ma_yeu_cau      varchar(20)   not null references yeu_cau_lop(ma_yeu_cau) on delete cascade,
     ma_mon          varchar(20)   not null references mon_hoc(ma_mon),
-    vai_tro_mon     nvarchar(20)  not null default n'chính',
+    vai_tro_mon     nvarchar(20)  not null default N'chính',
     ghi_chu         nvarchar(max) null,
     primary key (ma_yeu_cau, ma_mon)
 );
 
--- bảng lưu danh sách gia sư ứng tuyển vào các yêu cầu lớp
 create table ung_tuyen (
     ma_ung_tuyen        varchar(30)   primary key,
     ma_yeu_cau          varchar(20)   not null references yeu_cau_lop(ma_yeu_cau) on delete cascade,
@@ -131,11 +123,8 @@ create table ung_tuyen (
     constraint ck_ung_tuyen_trang_thai check (trang_thai in ('pending', 'accepted', 'rejected', 'withdrawn'))
 );
 
--- ==============================================================================
 -- phần 3: quản lý lớp học và lịch học
--- ==============================================================================
 
--- bảng lưu thông tin lớp học chính thức giữa gia sư và học viên
 create table lop_hoc (
     ma_lop          varchar(20)   primary key,
     ma_gia_su       varchar(20)   not null references gia_su(ma_gia_su),
@@ -159,13 +148,12 @@ create table lop_hoc (
 create table lop_hoc_mon (
     ma_lop              varchar(20)   not null references lop_hoc(ma_lop) on delete cascade,
     ma_mon              varchar(20)   not null references mon_hoc(ma_mon),
-    vai_tro_mon         nvarchar(20)  not null default n'chính',
+    vai_tro_mon         nvarchar(20)  not null default N'chính',
     so_buoi_du_kien     int           null check (so_buoi_du_kien is null or so_buoi_du_kien >= 0),
     ghi_chu             nvarchar(max) null,
     primary key (ma_lop, ma_mon)
 );
-
--- bảng lưu lịch học định kỳ trong tuần của lớp
+--- lớp hc có nhiều lịch dạy
 create table lich_hoc (
     ma_lich             varchar(20)   primary key,
     ma_lop              varchar(20)   not null references lop_hoc(ma_lop) on delete cascade,
@@ -176,7 +164,6 @@ create table lich_hoc (
     constraint uq_lich_hoc_lop_lich unique (ma_lop, ma_lich)
 );
 
--- bảng lưu chi tiết từng buổi học cụ thể theo lịch
 create table buoi_hoc (
     ma_buoi_hoc     varchar(20)   primary key,
     ma_lop          varchar(20)   not null references lop_hoc(ma_lop) on delete cascade,
@@ -190,21 +177,15 @@ create table buoi_hoc (
     constraint ck_buoi_hoc_trang_thai check (trang_thai in ('scheduled', 'completed', 'cancelled', 'rescheduled'))
 );
 
--- [FIX Bug 2] Đổi từ composite FK (ma_lop, ma_lich) sang FK đơn trên ma_lich.
--- ma_lich là PK của lich_hoc nên đã globally unique — composite FK là dư thừa.
--- ON DELETE SET NULL: khi xóa lịch định kỳ, buổi học cụ thể vẫn giữ nguyên.
 alter table buoi_hoc
     add constraint fk_buoi_hoc_lich
     foreign key (ma_lich) references lich_hoc(ma_lich)
     on delete set null;
 go
 
--- ==============================================================================
 -- phần 4: đăng ký, điểm danh, đánh giá, thanh toán
--- ==============================================================================
 
 -- bảng lưu trạng thái đăng ký vào lớp của học viên
--- một lớp 1-1 nên (ma_lop) là unique luôn
 create table dang_ky (
     ma_dang_ky      varchar(20)   primary key,
     ma_hoc_vien     varchar(20)   not null references hoc_vien(ma_hoc_vien),
@@ -215,7 +196,6 @@ create table dang_ky (
     constraint ck_dang_ky_trang_thai check (trang_thai in ('pending', 'confirmed', 'cancelled', 'completed'))
 );
 
--- bảng lưu thông tin tài khoản ngân hàng của học viên để thanh toán
 create table tai_khoan_hv (
     ma_tk_hv            varchar(20)   primary key,
     ma_hoc_vien         varchar(20)   not null references hoc_vien(ma_hoc_vien) on delete cascade,
@@ -262,7 +242,7 @@ create table giao_dich (
     constraint ck_giao_dich_loai check (loai_giao_dich in ('thanhtoanthang', 'thanhtoanbuoi', 'hoantra', 'phidangky'))
 );
 
--- bảng lưu đánh giá, nhận xét của học viên dành cho gia sư
+--- dánh giá của hv dành cho gs
 create table danh_gia (
     ma_danh_gia     varchar(20)   primary key,
     ma_dang_ky      varchar(20)   not null unique references dang_ky(ma_dang_ky),
@@ -271,7 +251,7 @@ create table danh_gia (
     ngay_danh_gia   datetime2(0)  not null default sysdatetime()
 );
 
--- bảng ghi nhận điểm danh có mặt/vắng mặt của từng buổi học
+--- điểm danh từng buổi
 create table diem_danh (
     ma_buoi_hoc     varchar(20)   not null references buoi_hoc(ma_buoi_hoc) on delete cascade,
     ma_dang_ky      varchar(20)   not null references dang_ky(ma_dang_ky),
@@ -282,11 +262,10 @@ create table diem_danh (
     constraint ck_diem_danh_trang_thai check (trang_thai in ('comat', 'vangmat', 'tre', 'phep'))
 );
 
--- ==============================================================================
 -- phần 5: thông báo và theo dõi hệ thống
 -- ==============================================================================
 
--- bảng lưu thông báo gửi đến học viên hoặc gia sư (đúng 1 trong 2)
+-- bảng lưu thông báo gửi đến học viên hoặc gia sư 
 create table thong_bao (
     ma_thong_bao    varchar(30)   primary key,
     ma_hoc_vien     varchar(20)   null references hoc_vien(ma_hoc_vien) on delete cascade,
@@ -305,8 +284,7 @@ create table thong_bao (
         (case when ma_gia_su is null then 0 else 1 end) = 1
     )
 );
-
--- bảng lưu lịch sử thay đổi dữ liệu quan trọng để theo dõi (audit)
+---lưu lại ls thay đổi data
 create table audit_log (
     id              bigint        identity(1,1) primary key,
     table_name      varchar(50)   not null,
@@ -319,15 +297,12 @@ create table audit_log (
     constraint ck_audit_log_action check (action in ('insert', 'update', 'delete'))
 );
 
--- bảng lưu lịch sử đi dạy của gia sư (các lớp đã hoàn thành hoặc bị hủy)
--- [FIX Bug 3] Đây là bảng archive (denormalized history):
---   ma_lop cố tình KHÔNG có FK để giữ record ngay cả khi lớp bị xóa.
---   ten_hoc_vien là snapshot tên học viên tại thời điểm ghi — tự đứng vững không cần join.
+-- bảng lưu ls dạy của gs
 create table lich_su_day_hoc (
     ma_lich_su_day  varchar(30)   primary key,
     ma_gia_su       varchar(20)   not null references gia_su(ma_gia_su) on delete cascade,
-    ma_lop          varchar(20)   not null,                  -- intentionally no FK (archive)
-    ten_hoc_vien    nvarchar(100) null,                      -- snapshot tên học viên
+    ma_lop          varchar(20)   not null,                 
+    ten_hoc_vien    nvarchar(100) null,                     
     ten_mon_hoc     nvarchar(200) null,
     ngay_bat_dau    date          null,
     ngay_ket_thuc   date          null,
@@ -339,9 +314,6 @@ create table lich_su_day_hoc (
 );
 
 -- bảng lưu lịch sử đăng ký thuê gia sư của học viên
--- [FIX Bug 3] Đây là bảng archive (denormalized history):
---   ma_lop, ma_yeu_cau cố tình KHÔNG có FK để giữ record khi lớp/yêu cầu bị xóa.
---   ten_gia_su là snapshot tên gia sư tại thời điểm ghi — tự đứng vững không cần join.
 create table lich_su_thue_gia_su (
     ma_lich_su_thue varchar(30)   primary key,
     ma_hoc_vien     varchar(20)   not null references hoc_vien(ma_hoc_vien) on delete cascade,
@@ -1214,3 +1186,4 @@ values
 ('TKGS_T01', 'GS_T01', '200000001', N'MBBank', 'bank', N'LE GIA SU 1',     1),
 ('TKGS_T02', 'GS_T02', '200000002', N'TPB',    'bank', N'PHAM GIA SU 2',   1);
 go
+

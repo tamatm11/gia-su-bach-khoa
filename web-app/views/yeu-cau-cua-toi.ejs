@@ -102,6 +102,50 @@
       <a href="/dang-tin" class="btn-primary no-underline">Đăng yêu cầu đầu tiên</a>
     </div>
   <% } %>
+
+  <!-- Lịch sử thuê gia sư -->
+  <h2 class="text-headline-md text-on-surface mt-10 mb-2">Lịch sử thuê gia sư</h2>
+  <p class="text-body-md text-on-surface-variant mb-6">Các lớp đã hoàn thành hoặc đã hủy</p>
+  <% if (lichSuThue && lichSuThue.length > 0) { %>
+    <div class="card overflow-x-auto">
+      <table class="w-full text-label-md">
+        <thead>
+          <tr class="border-b border-outline-variant text-on-surface-variant">
+            <th class="text-left py-2 px-3 font-semibold">Lớp</th>
+            <th class="text-left py-2 px-3 font-semibold">Môn</th>
+            <th class="text-left py-2 px-3 font-semibold">Gia sư</th>
+            <th class="text-left py-2 px-3 font-semibold">Ngày bắt đầu</th>
+            <th class="text-left py-2 px-3 font-semibold">Ngày kết thúc</th>
+            <th class="text-left py-2 px-3 font-semibold">Học phí/buổi</th>
+            <th class="text-left py-2 px-3 font-semibold">Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant">
+          <% lichSuThue.forEach(function(lop) { %>
+            <tr class="hover:bg-surface-container-low transition-colors">
+              <td class="py-2 px-3"><a href="/lop-hoc/<%= lop.ma_lop %>" class="text-primary hover:underline"><%= lop.ma_lop %></a></td>
+              <td class="py-2 px-3 text-on-surface-variant">
+                <%= lop.lop_hoc_mon && lop.lop_hoc_mon[0] ? lop.lop_hoc_mon[0].mon_hoc.ten_mon : '—' %>
+              </td>
+              <td class="py-2 px-3"><%= lop.gia_su ? lop.gia_su.ho_ten : '—' %></td>
+              <td class="py-2 px-3 text-on-surface-variant"><%= lop.ngay_bat_dau ? new Date(lop.ngay_bat_dau).toLocaleDateString('vi-VN') : '—' %></td>
+              <td class="py-2 px-3 text-on-surface-variant"><%= lop.ngay_ket_thuc ? new Date(lop.ngay_ket_thuc).toLocaleDateString('vi-VN') : '—' %></td>
+              <td class="py-2 px-3"><%= Math.round(Number(lop.hoc_phi) / 1000) %>k</td>
+              <td class="py-2 px-3">
+                <span class="badge <%= lop.trang_thai === 'da_hoan_thanh' ? 'badge-open' : 'badge-closed' %>">
+                  <%= lop.trang_thai === 'da_hoan_thanh' ? 'Hoàn thành' : 'Đã hủy' %>
+                </span>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="glass-panel rounded-2xl p-8 text-center">
+      <p class="text-body-md text-on-surface-variant">Chưa có lịch sử thuê gia sư.</p>
+    </div>
+  <% } %>
 </section>
 
 <!-- Modal Duyệt Gia Sư -->

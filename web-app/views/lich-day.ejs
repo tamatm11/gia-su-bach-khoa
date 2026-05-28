@@ -71,6 +71,49 @@
     <% } %>
   </div>
 
+  <!-- Lịch sử dạy -->
+  <div class="card mt-6">
+    <h2 class="text-body-lg font-semibold mb-4">Lịch sử dạy</h2>
+    <% if (lichSu && lichSu.length > 0) { %>
+      <div class="overflow-x-auto">
+        <table class="w-full text-label-md">
+          <thead>
+            <tr class="border-b border-outline-variant text-on-surface-variant">
+              <th class="text-left py-2 px-3 font-semibold">Lớp</th>
+              <th class="text-left py-2 px-3 font-semibold">Môn</th>
+              <th class="text-left py-2 px-3 font-semibold">Học viên</th>
+              <th class="text-left py-2 px-3 font-semibold">Ngày bắt đầu</th>
+              <th class="text-left py-2 px-3 font-semibold">Ngày kết thúc</th>
+              <th class="text-left py-2 px-3 font-semibold">Học phí/buổi</th>
+              <th class="text-left py-2 px-3 font-semibold">Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant">
+            <% lichSu.forEach(function(lop) { %>
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-2 px-3"><a href="/lop-hoc/<%= lop.ma_lop %>" class="text-primary hover:underline"><%= lop.ma_lop %></a></td>
+                <td class="py-2 px-3 text-on-surface-variant">
+                  <%= lop.lop_hoc_mon && lop.lop_hoc_mon[0] ? lop.lop_hoc_mon[0].mon_hoc.ten_mon : '—' %>
+                </td>
+                <td class="py-2 px-3"><%= lop.hoc_vien ? lop.hoc_vien.ho_ten : '—' %></td>
+                <td class="py-2 px-3 text-on-surface-variant"><%= lop.ngay_bat_dau ? new Date(lop.ngay_bat_dau).toLocaleDateString('vi-VN') : '—' %></td>
+                <td class="py-2 px-3 text-on-surface-variant"><%= lop.ngay_ket_thuc ? new Date(lop.ngay_ket_thuc).toLocaleDateString('vi-VN') : '—' %></td>
+                <td class="py-2 px-3"><%= Math.round(Number(lop.hoc_phi) / 1000) %>k</td>
+                <td class="py-2 px-3">
+                  <span class="badge <%= lop.trang_thai === 'da_hoan_thanh' ? 'badge-open' : 'badge-closed' %>">
+                    <%= lop.trang_thai === 'da_hoan_thanh' ? 'Hoàn thành' : 'Đã hủy' %>
+                  </span>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <p class="text-label-md text-on-surface-variant text-center py-6">Chưa có lịch sử dạy.</p>
+    <% } %>
+  </div>
+
   <!-- Hướng dẫn -->
   <div class="card mt-6">
     <h3 class="text-body-lg font-semibold mb-3">Hướng dẫn</h3>
