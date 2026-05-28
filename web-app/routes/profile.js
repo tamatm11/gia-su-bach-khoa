@@ -16,6 +16,18 @@ function requireLogin(req, res, next) {
 // -----------------------------------------------------
 
 // Form chỉnh sửa hồ sơ
+router.get('/ho-so', requireLogin, (req, res) => {
+  if (req.session.role === 'gia_su' && req.session.user.ma_gia_su) {
+    return res.redirect(`/ho-so-gia-su/${req.session.user.ma_gia_su}`);
+  }
+
+  if (req.session.role === 'hoc_vien' && req.session.user.ma_hoc_vien) {
+    return res.redirect(`/ho-so-hoc-vien/${req.session.user.ma_hoc_vien}`);
+  }
+
+  res.redirect('/ho-so/chinh-sua');
+});
+
 router.get('/ho-so/chinh-sua', requireLogin, async (req, res) => {
   const isGiaSu = req.session.role === 'gia_su';
   const table = isGiaSu ? 'gia_su' : 'hoc_vien';
@@ -23,7 +35,7 @@ router.get('/ho-so/chinh-sua', requireLogin, async (req, res) => {
   const idValue = isGiaSu ? req.session.user.ma_gia_su : req.session.user.ma_hoc_vien;
 
   try {
-    const { data: profile } = await supabase.from(table).select('*').eq(primaryKey, idValue).single();
+    const { data: profile } = await supabaseAdmin.from(table).select('*').eq(primaryKey, idValue).single();
     res.render('ho-so-chinh-sua', { profile: profile || req.session.user, isGiaSu });
   } catch (err) {
     req.session.error = 'Lỗi tải hồ sơ: ' + err.message;

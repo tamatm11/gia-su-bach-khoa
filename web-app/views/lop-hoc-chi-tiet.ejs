@@ -132,9 +132,19 @@
                     <p class="text-label-sm text-on-surface-variant"><%= bh.gio_bat_dau.substring(0,5) %> - <%= bh.gio_ket_thuc ? bh.gio_ket_thuc.substring(0,5) : '' %></p>
                   <% } %>
                 </div>
-                <span class="badge <%= bh.trang_thai === 'da_hoc' ? 'badge-active' : (bh.trang_thai === 'vang' ? 'badge-closed' : 'badge-pending') %>">
-                  <%= bh.trang_thai === 'da_hoc' ? 'Đã học' : (bh.trang_thai === 'vang' ? 'Vắng' : bh.trang_thai || 'Chưa điểm danh') %>
-                </span>
+                <% if (bh.diem_danh) { %>
+                  <span class="badge <%= bh.diem_danh.trang_thai === 'comat' ? 'badge-active' : (bh.diem_danh.trang_thai === 'vangmat' ? 'badge-closed' : (bh.diem_danh.trang_thai === 'tre' ? 'badge-pending' : 'badge-closed')) %>">
+                    <%= bh.diem_danh.trang_thai === 'comat' ? 'Có mặt' : (bh.diem_danh.trang_thai === 'vangmat' ? 'Vắng mặt' : (bh.diem_danh.trang_thai === 'tre' ? 'Đến trễ' : 'Nghỉ phép')) %>
+                  </span>
+                <% } else if (role === 'gia_su' && bh.trang_thai !== 'cancelled') { %>
+                  <form action="/lop-hoc/<%= lop.ma_lop %>/diem-danh/<%= bh.ma_buoi_hoc %>" method="POST" class="m-0 flex gap-2">
+                    <input type="hidden" name="trang_thai" id="trang_thai_<%= bh.ma_buoi_hoc %>" value="comat">
+                    <button type="submit" onclick="document.getElementById('trang_thai_<%= bh.ma_buoi_hoc %>').value='comat'" class="btn-primary" style="padding: 4px 12px; font-size: 12px; border-radius: 6px;">Có mặt</button>
+                    <button type="submit" onclick="document.getElementById('trang_thai_<%= bh.ma_buoi_hoc %>').value='vangmat'" class="btn-secondary text-error bg-error/10 border-error/20 hover:bg-error/20 hover:border-error/30" style="padding: 4px 12px; font-size: 12px; border-radius: 6px;">Vắng</button>
+                  </form>
+                <% } else { %>
+                  <span class="badge badge-pending">Chưa điểm danh</span>
+                <% } %>
               </div>
             <% }); %>
           </div>

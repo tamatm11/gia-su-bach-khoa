@@ -96,4 +96,20 @@ router.get('/hoc-vien', async (req, res) => {
   res.render('admin/hoc-vien', { list: list || [], search: search || '' });
 });
 
+// Admin - Audit Logs
+router.get('/audit-logs', async (req, res) => {
+  try {
+    const { data: logs } = await supabaseAdmin
+      .from('audit_log')
+      .select('*')
+      .order('changed_at', { ascending: false })
+      .limit(100);
+      
+    res.render('admin/audit-logs', { logs: logs || [] });
+  } catch (err) {
+    console.error('Lỗi lấy audit logs:', err.message);
+    res.render('admin/audit-logs', { logs: [] });
+  }
+});
+
 module.exports = router;
