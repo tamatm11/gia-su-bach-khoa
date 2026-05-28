@@ -317,8 +317,24 @@ app.post('/chon-gia-su', async (req, res) => {
   const formattedGioKT = listGioKT.map(t => t && t.length === 5 ? t + ':00' : t);
 
   try {
+    // Pre-check trùng lịch gia sư trước khi tạo lớp
+    for (let i = 0; i < listThu.length; i++) {
+      const { data: isOverlap, error: errCheck } = await supabaseAdmin.rpc('fn_kiem_tra_trung_lich', {
+        p_ma_gia_su: ma_gia_su,
+        p_thu: parseInt(listThu[i]),
+        p_gio_bat_dau: formattedGioBD[i],
+        p_gio_ket_thuc: formattedGioKT[i]
+      });
+      if (errCheck) throw errCheck;
+      if (isOverlap) {
+        const thuName = ['', 'Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][parseInt(listThu[i])] || `Thứ ${listThu[i]}`;
+        req.session.error = `Trùng lịch dạy: Gia sư đã có lịch vào ${thuName} từ ${formattedGioBD[i].substring(0,5)} đến ${formattedGioKT[i].substring(0,5)}. Vui lòng chọn khung giờ khác.`;
+        return res.redirect(req.headers.referer || '/yeu-cau-cua-toi');
+      }
+    }
+
     const ma_lop = 'LH' + Date.now().toString(36).toUpperCase();
-    
+
     // Gọi stored procedure duy nhất đảm bảo tính nguyên tử (atomic transaction)
     const { error } = await supabaseAdmin.rpc('sp_chon_gia_su_va_tao_lop_va_lich', {
       p_ma_lop: ma_lop,

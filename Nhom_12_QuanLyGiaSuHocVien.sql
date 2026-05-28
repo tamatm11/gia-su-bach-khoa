@@ -330,9 +330,7 @@ create table lich_su_thue_gia_su (
 );
 go
 
--- ==============================================================================
--- phần 6: chỉ mục (indexes)
--- ==============================================================================
+---chỉ mục (indexe)
 
 create unique index ux_hoc_vien_auth  on hoc_vien(auth_id)       where auth_id is not null;
 create unique index ux_hoc_vien_sdt   on hoc_vien(so_dien_thoai) where so_dien_thoai is not null;
@@ -354,15 +352,12 @@ create index ix_ung_tuyen_gia_su  on ung_tuyen(ma_gia_su, trang_thai);
 create index ix_lop_hoc_gia_su   on lop_hoc(ma_gia_su, trang_thai);
 create index ix_lop_hoc_hoc_vien on lop_hoc(ma_hoc_vien, trang_thai);
 
--- chỉ giữ unique index (đã bao prefix cần thiết, bỏ ix_lich_hoc_lop trùng lặp)
 create unique index ux_lich_hoc_lop_thu_gio on lich_hoc(ma_lop, thu_trong_tuan, gio_bat_dau);
 
 create index ix_buoi_hoc_lop_ngay on buoi_hoc(ma_lop, ngay_hoc);
 
--- [FIX Bug 2] Index trên ma_lich phục vụ FK lookup và trigger kiểm tra trùng lịch
 create index ix_buoi_hoc_ma_lich on buoi_hoc(ma_lich) where ma_lich is not null;
 
--- [FIX Bug 6] Index trên ngay_hoc giúp trigger tr_buoi_hoc_check_trung scan cross-lớp nhanh hơn
 create index ix_buoi_hoc_ngay_hoc on buoi_hoc(ngay_hoc, trang_thai) where trang_thai != 'cancelled';
 
 create index ix_dang_ky_lop       on dang_ky(ma_lop, trang_thai);
@@ -382,11 +377,7 @@ create unique index ux_lop_hoc_ung_tuyen on lop_hoc(ma_ung_tuyen) where ma_ung_t
 create index ix_audit_log_table_record on audit_log(table_name, record_id, changed_at desc);
 go
 
--- ==============================================================================
 -- phần 7: hàm (functions)
--- ==============================================================================
-
--- hàm tính điểm đánh giá trung bình của một gia sư
 create or alter function fn_tinh_diem_tb_gia_su(@p_ma_gia_su varchar(20))
 returns decimal(3,2) as
 begin
@@ -401,8 +392,9 @@ begin
 end;
 go
 
--- hàm kiểm tra xem gia sư có bị trùng lịch học hay không.
--- exclude theo ma_lich (cho lich_hoc) để cùng lớp vẫn phát hiện được hai khung giờ chồng nhau.
+-- xem gia sư có bị trùng lịch hay ko
+-- vis dụ gia sư tâm có đang dạy thứ 2, 18:00-19:30 lớp nào khác không?,nhận lớp / tạo lịch cố định trong lớp
+
 create or alter function fn_kiem_tra_trung_lich_lichhoc(
     @p_ma_gia_su       varchar(20),
     @p_thu             smallint,
@@ -428,9 +420,7 @@ begin
     return @v_trung;
 end;
 go
-
--- hàm kiểm tra trùng cho buổi học cụ thể (exclude theo ma_buoi_hoc).
--- so sánh cả với các lịch định kỳ ở cùng thứ trong tuần và các buổi học khác cùng ngày.
+-- check buổi hc cụ thể theo ngày có bị trùng ko
 create or alter function fn_kiem_tra_trung_buoihoc(
     @p_ma_gia_su       varchar(20),
     @p_ngay_hoc        date,
@@ -458,7 +448,7 @@ begin
 end;
 go
 
--- hàm đếm số lớp đang dạy hiện tại của gia sư
+-- count số lớp gs đang dạy
 create or alter function fn_dem_lop_dang_day(@p_ma_gia_su varchar(20))
 returns int as
 begin
@@ -490,10 +480,7 @@ begin
 end;
 go
 
--- [FIX Bug 5] Hàm kiểm tra học viên có giao dịch thất bại chưa được giải quyết không.
--- Logic gốc cấm nhầm học viên có lỗi lịch sử dù đã thanh toán lại thành công.
--- Logic mới: chỉ coi là không hợp lệ khi có giao dịch 'failed' trong 30 ngày gần nhất
--- VÀ chưa có giao dịch 'success' nào sau đó cho cùng đăng ký (lỗi chưa được giải quyết).
+-- check hv có hợp lệ hay k dựa trên thanh toán ( đã thanh toán hc phí hay chưa)
 create or alter function fn_hoc_vien_hop_le(@p_ma_hoc_vien varchar(20))
 returns bit as
 begin
@@ -501,18 +488,17 @@ begin
         select 1
         from giao_dich gd
         join dang_ky dk on gd.ma_dang_ky = dk.ma_dang_ky
-        where dk.ma_hoc_vien      = @p_ma_hoc_vien
-          and gd.trang_thai       = 'failed'
-          and gd.ngay_thanh_toan >= dateadd(day, -30, sysdatetime())
+        where dk.ma_hoc_vien      = @p_ma_hoc_vien and gd.trang_thai  = 'failed' 
+        and gd.ngay_thanh_toan >= dateadd(day, -30, sysdatetime())
+        -- sau khi gd lỗi, có gd khác thành công hay ko, nếu có thì hc viên hợp lệ
           and not exists (
-              -- đã có giao dịch thành công SAU giao dịch lỗi này → đã giải quyết
               select 1 from giao_dich gd2
               where gd2.ma_dang_ky      = gd.ma_dang_ky
                 and gd2.trang_thai      = 'success'
                 and gd2.ngay_thanh_toan > gd.ngay_thanh_toan
           )
-    )
-        return 0;
+    )return 0;
+        
     return 1;
 end;
 go
@@ -525,7 +511,7 @@ begin
 end;
 go
 
--- hàm lấy danh sách khung giờ đã có lịch của gia sư trong một thứ cụ thể
+--lấy danh sách khung giờ đã có lịch của gia sư trong một thứ cụ thể
 create or alter function fn_khung_gio_dang_co(@p_ma_gia_su varchar(20), @p_thu smallint)
 returns table as
 return (
@@ -538,14 +524,12 @@ return (
 );
 go
 
--- ==============================================================================
--- phần 8: triggers
--- ==============================================================================
+---- TRIGGER   
 
--- trigger tự động cập nhật ngay_cap_nhat khi sửa học viên (có guard tránh đệ quy)
+-- trigger tự động cập nhật ngay_cap_nhat khi sửa học viên
 create or alter trigger tr_hoc_vien_updated_at on hoc_vien after update as
 begin
-    if trigger_nestlevel(@@procid) > 1 return;
+    if trigger_nestlevel(@@procid) > 1 return; -- cái trigger_nestlevel này để xem coi trigger có đang gọi trigger kahcs ko, tránh bị vòng lặp vô hạn
     if not exists (select 1 from inserted) return;
     update hv set ngay_cap_nhat = sysdatetime()
     from hoc_vien hv
@@ -587,7 +571,7 @@ begin
 end;
 go
 
--- trigger kiểm tra giao dịch: tài khoản phải khớp chủ đăng ký hoặc gia sư
+-- trigger kiểm tra giao dịch kiểm tra tài khoản chính chủ
 create or alter trigger tr_giao_dich_validate on giao_dich after insert, update as
 begin
     if exists (
@@ -605,7 +589,6 @@ end;
 go
 
 -- trigger ngăn chặn xếp lịch học định kỳ bị trùng giờ của gia sư.
--- exclude theo ma_lich để phát hiện được trùng giờ cả trong cùng một lớp.
 create or alter trigger tr_lich_hoc_check_trung on lich_hoc after insert, update as
 begin
     if exists (
@@ -624,7 +607,7 @@ begin
 end;
 go
 
--- trigger ngăn chặn tạo buổi học cụ thể bị trùng giờ của gia sư
+-- khi tạo 1 buổi học, check xem cái buổi đấy có bị trùng với lịch của gs hay ko
 create or alter trigger tr_buoi_hoc_check_trung on buoi_hoc after insert, update as
 begin
     if exists (
@@ -754,7 +737,6 @@ begin
 end;
 go
 
--- ==============================================================================
 -- phần 9: khung nhìn (views)
 -- ==============================================================================
 
@@ -838,8 +820,7 @@ select
     l.ma_yeu_cau,
     (select count(*) from lich_hoc lh where lh.ma_lop = l.ma_lop) as so_lich_hoc,
     (select count(*) from buoi_hoc bh where bh.ma_lop = l.ma_lop) as so_buoi_da_hoc
-from lop_hoc l
-join gia_su   gs on l.ma_gia_su   = gs.ma_gia_su
+from lop_hoc l join gia_su   gs on l.ma_gia_su   = gs.ma_gia_su
 join hoc_vien hv on l.ma_hoc_vien = hv.ma_hoc_vien;
 go
 
@@ -866,8 +847,8 @@ select
     year(ngay_thanh_toan)  as nam,
     month(ngay_thanh_toan) as thang,
     trang_thai,
-    count(*)                    as so_luong_giao_dich,
-    sum(tong_tien_thu)          as tong_doanh_thu,
+    count(*)  as so_luong_giao_dich,
+    sum(tong_tien_thu)  as tong_doanh_thu,
     sum(phi_hoa_hong)           as tong_loi_nhuan,
     sum(so_tien_gia_su_nhan)    as tong_chi_tra_gia_su
 from giao_dich
@@ -899,11 +880,8 @@ join hoc_vien hv on yc.ma_hoc_vien = hv.ma_hoc_vien
 where yc.trang_thai = 'open';
 go
 
--- ==============================================================================
--- phần 10: thủ tục (stored procedures)
--- mọi sp ghi nhiều bảng đều bọc trong transaction + try/catch để đảm bảo toàn vẹn
--- ==============================================================================
-
+-- thủ tục stored proc
+--- ======================================
 if object_id(N'dbo.sp_tao_yeu_cau_lop', N'p') is not null drop procedure dbo.sp_tao_yeu_cau_lop;
 go
 create procedure dbo.sp_tao_yeu_cau_lop
@@ -954,10 +932,10 @@ go
 
 if object_id(N'dbo.sp_chon_gia_su', N'p') is not null drop procedure dbo.sp_chon_gia_su;
 go
--- [FIX Bug 1] Bọc trong transaction + SET XACT_ABORT ON để đảm bảo tính toàn vẹn.
--- Nguyên bản không có transaction: nếu trigger tr_yeu_cau_chon_gia_su fail sau khi
--- UPDATE đã chạy, yeu_cau_lop bị 'closed' nhưng ung_tuyen vẫn còn 'pending'.
--- Thêm validate: yêu cầu phải đang 'open' trước khi cho phép chọn gia sư.
+
+
+
+-- yêu cầu phải đang 'open' trước khi cho phép chọn gia sư.
 create procedure dbo.sp_chon_gia_su
     @p_ma_yeu_cau varchar(20),
     @p_ma_gia_su  varchar(20)
@@ -975,7 +953,6 @@ begin
     )
         throw 50012, N'Gia sư chưa ứng tuyển hoặc ứng tuyển đã được xử lý.', 1;
 
-    -- [FIX] validate thêm: yêu cầu phải đang ở trạng thái 'open'
     if not exists (
         select 1 from yeu_cau_lop
         where ma_yeu_cau = @p_ma_yeu_cau
@@ -987,9 +964,9 @@ begin
         begin transaction;
 
         -- trigger tr_yeu_cau_chon_gia_su sẽ tự động:
-        --   (a) SET ung_tuyen của GS được chọn  → 'accepted'
-        --   (b) SET các ung_tuyen còn lại        → 'rejected'
-        --   (c) Gửi thông báo cho tất cả các bên
+        --    ung_tuyen của GS được chọn  → 'accepted'
+        --  các ung_tuyen còn lại        → 'rejected'
+        --   Gửi thông báo cho tất cả các bên
         update yeu_cau_lop
         set ma_gia_su_duoc_chon = @p_ma_gia_su,
             ngay_chon_gia_su    = sysdatetime(),
